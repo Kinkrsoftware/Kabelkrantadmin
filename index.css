@@ -1,0 +1,54 @@
+      /* S: 40 V: 100 */
+      body {
+        font-family: verdana, sans-serif;
+        font-size: x-small;
+      }
+
+      th.none {
+        background-color: transparent;
+	border: inherit;
+	text-align: left;
+      }
+
+      th {
+        background-color: #ffff99;
+	border: 1px solid #000;
+	text-align: center;
+      }
+
+      td {
+        background-color: #ffff99;
+        border: 1px solid #000;
+	text-align: center;
+      }
+
+      td.title {
+        width: 275px;
+	text-align: left;
+      }
+
+      td.title a {
+        text-decoration: none;
+      }
+      
+      td.title a:hover {
+        text-decoration: underline;
+      }
+
+      td.startdate {
+        background-color: #99ff99;
+	border: 1px solid #000;
+	text-align: center;
+      }
+
+      td.enddate {
+        background-color: #ff9999;
+	border: 1px solid #000;
+	text-align: center;
+      }
+
+      td.duration {
+        background-color: #ffff99;
+	border: 1px solid #000;
+	text-align: center;
+      }

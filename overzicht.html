@@ -1,0 +1,41 @@
+<?php
+  require_once('config.php'); 
+  if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') === false)
+    header('Content-type: application/xhtml+xml; charset=utf-8');
+  else
+    header('Content-type: text/html; charset=utf-8');
+?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+  <head>
+    <title>Speciaal voor Sonja</title>
+    <style type="text/css">
+      <![CDATA[
+      html {
+        background-color: #ffff99;
+      }
+      
+      body {
+        font-family: verdana, sans-serif;
+	font-size: small;
+      }
+
+      input,textarea {
+        border: 1px solid #000;
+	width: auto;
+	float: left;
+      }
+
+      fieldset,select {
+        border: 1px solid #000;
+      }
+
+      ]]>
+    </style>
+  </head>
+  <body>
+    <center><img width="600" height="200" src="overzicht.php" src="Kabelkrant Overzicht" /></center><br />
+    <p align="right"><a href="index.php">Terug</a></p>
+  </body>
+</html>
