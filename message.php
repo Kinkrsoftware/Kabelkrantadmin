@@ -34,6 +34,7 @@ define('TITLE', 'Titel');
 define('TEXT', 'Tekst');
 define('NEWIMAGE', 'Nieuwe Afbeelding');
 define('UPLOAD', 'Upload');
+define('ERROR_IN_TEMPLATE', 'XML-fout in document');
 
 define('NEWTEMP', 'Nieuwe Template');
 define('CATEGORY', 'Categorie');
