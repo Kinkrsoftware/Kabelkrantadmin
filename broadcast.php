@@ -105,7 +105,7 @@
 	$bump = $image['category'].'.png';
 	if (file_exists(USER_IMAGEDIR.'/'.$bump)) {
 	  exec('rsync '.USER_IMAGEDIR.'/'.$bump.' '.BROADCASTCACHEDIR.'/'.$bump);
-	  fputs($fp, '      <img src="'.REMOTEDIR.'/cache/'.$bump.'" alt="'.htmlspecialchars('Bump - '.$image['category'], ENT_QUOTES, 'UTF-8').'" dur="'.BUMPDURATION.'" region="content" fill="remove" erase="whenDone" />'.chr(13).chr(10));
+	  fputs($fp, '      <img src="'.REMOTEDIR.'/cache/'.$bump.'" alt="'.htmlspecialchars('Bump - '.$image['category'], ENT_QUOTES, 'UTF-8').'" dur="'.BUMPDURATION.'s" region="content" fill="remove" erase="whenDone" />'.chr(13).chr(10));
 	}
       }
 
@@ -122,10 +122,48 @@
   fflush($fp);
   fclose($fp);
 
+  $fp = fopen($tmpdirectory.'/index.html', 'w');
+  fputs($fp, '<?xml version="1.0" encoding="UTF-8"?>'.$rn.
+             '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'.$rn.
+	     '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >'.$rn.
+             '  <head>'.$rn.
+	     '    <title>PlusRTV</title>'.$rn.
+	     '    <script type="text/javascript" src="smil.js"></script>'.$rn.
+             '    <link rel="stylesheet" href="index.css" type="text/css" />'.$rn.
+             '  </head>'.$rn.
+             '  <body onLoad="start();">'.$rn);
+  foreach ($out as $image) {
+    if (EMERGENCY) {
+      if ($image['template'] == 'NOOD.xsl') {
+        fputs($fp, '      <img src="'.$image['src'].'" alt="'.htmlspecialchars($image['title'], ENT_QUOTES, 'UTF-8').'" dur="'.$image['dur'].'s" />'.chr(13).chr(10));
+      }
+    } else {
+      if (defined('BUMPDURATION') && $current_cat != $image['category']) {
+	$current_cat = $image['category'];
+	$bump = $image['category'].'.png';
+	if (file_exists(USER_IMAGEDIR.'/'.$bump)) {
+	  exec('rsync '.USER_IMAGEDIR.'/'.$bump.' '.BROADCASTCACHEDIR.'/'.$bump);
+	  fputs($fp, '      <img src="'.REMOTEDIR.'/cache/'.$bump.'" alt="'.htmlspecialchars('Bump - '.$image['category'], ENT_QUOTES, 'UTF-8').'" dur="'.BUMPDURATION.'s" />'.chr(13).chr(10));
+	}
+      }
+      if ($image['template'] != 'video.xsl') {
+        fputs($fp, '      <img src="'.$image['src'].'" alt="'.htmlspecialchars($image['title'], ENT_QUOTES, 'UTF-8').'" dur="'.$image['dur'].'s" region="content" fill="remove" erase="whenDone" />'.chr(13).chr(10));
+      } else {
+//        fputs($fp, '      <video src="'.htmlspecialchars($image['title'], ENT_QUOTES, 'UTF-8').'" alt="Intermezzo" dur="'.$image['dur'].'s" region="content" fill="remove" erase="whenDone" />'.chr(13).chr(10));
+      }
+    }
+  }
+
+  fputs($fp, '  </body>'.$rn.
+             '</html>'.$rn);
+  fflush($fp);
+  fclose($fp);
+
   if (!file_exists($tmpdirectory)) {
     exec('mkdir '.$tmpdirectory);
   }
   exec('mv -u '.$tmpdirectory.'/*.smil '.BROADCASTDIR.'/.');
+  exec('mv -u '.$tmpdirectory.'/*.html '.BROADCASTDIR.'/.');
 //  exec('mv -u '.$tmpdirectory.'/*.png '.BROADCASTCACHEDIR.'/.');
   exec('ln -sf /home/tv/broadcast/'.date('Y-m-d', $now).'.smil /home/tv/broadcast.smil');
 

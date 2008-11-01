@@ -168,7 +168,7 @@
 	      
   function newpreview() {
     unset($_SESSION['document'][0]);
-    $_SESSION['document'][0]['text_duration']=20;
+    $_SESSION['document'][0]['text_duration']=DURATION;
     $_SESSION['document']['activeid']=0;
   }
 
@@ -219,9 +219,9 @@
   function checkandpreview($safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $para, $photo, $template, $dir='', $filename='', $cat_title='', $cat_photo='', $cat_width=0, $cat_height=0, $cat_x=0, $cat_y=0) {
     $filename = ($filename!=''?$filename:md5($title.$para.$photo.$template.$category));
     $dir = ($dir!=''?$dir:PREVIEWDIR);
-    $pngfile = $dir.'/'.$filename.'.png';
+    $file = $dir.'/'.$filename.$format;
 
-    if (!file_exists($pngfile)) {
+    if (!file_exists($file)) {
           $category_xml = '<category><title>'.strtoupper($cat_title).'</title><img><src>'.($cat_photo!=''?USER_IMAGEDIR.'/'.$cat_photo:'').'</src>'.
                           '<width>'.$cat_width.'</width>'.
                           '<height>'.$cat_height.'</height>'.
@@ -256,8 +256,10 @@
 
       $xml = null;
 
-      $debug = shell_exec('/usr/bin/inkscape -z --file='.$svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$pngfile.' 2>&1 1>/dev/null');
-      // unlink($svgfile);
+      if ($format == 'png') {
+	      $debug = shell_exec('/usr/bin/inkscape -z --file='.$svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file.' 2>&1 1>/dev/null');
+      }
+      unlink($svgfile);
      }
      return $filename;
   }
