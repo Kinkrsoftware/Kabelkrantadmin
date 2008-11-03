@@ -49,13 +49,14 @@
   }
   sqlite_close($db);
 
+
   $result = array_merge($vandaagresult, $contentresult, $colofonresult, $adsintro, $adsresult, $adsoutro);
 
 //  exec('/usr/bin/sudo -u broadcast sshfs -o nonempty -o allow_other tv@'.REMOTEHOST.':'.REMOTEDIR.' '.BROADCASTDIR);
   
 
-//  $tmpdirectory = CACHEDIR.'/'.date('Y-m-d',$now);
-  $tmpdirectory = CACHEDIR;
+  $tmpdirectory = CACHEDIR.'/'.date('Y-m-d',$now);
+//  $tmpdirectory = CACHEDIR;
   if (!file_exists($tmpdirectory)) {
     if (!file_exists(CACHEDIR)) mkdir(CACHEDIR);
     mkdir($tmpdirectory);
@@ -82,6 +83,7 @@
 
   $fp = fopen($tmpdirectory.'/'.date('Y-m-d',$now).'.smil', 'w');
   $rn = chr(13).chr(10);
+
   fputs($fp, '<?xml version="1.0"?>'.$rn.
              '<!DOCTYPE smil PUBLIC "-//W3C//DTD SMIL 2.0//EN" "http://www.w3.org/2001/SMIL20/SMIL20.dtd">'.$rn.
 	     '<smil xmlns="http://www.w3.org/2001/SMIL20/Language" xmlns:rn="http://features.real.com/2001/SMIL20/Extensions">'.$rn.
@@ -99,14 +101,16 @@
       if ($image['template'] == 'NOOD.xsl') {
         fputs($fp, '      <img src="'.$image['src'].'" alt="'.htmlspecialchars($image['title'], ENT_QUOTES, 'UTF-8').'" dur="'.$image['dur'].'s" region="content" fill="remove" erase="whenDone" />'.chr(13).chr(10));
       }
+
     } else {
       if (defined('BUMPDURATION') && $current_cat != $image['category']) {
 	$current_cat = $image['category'];
 	$bump = $image['category'].'.png';
+	exec('cp "'.USER_IMAGEDIR.'/'.$bump.'" "'.$tmpdirectory.'/'.$bump.'"');
 	if (file_exists(USER_IMAGEDIR.'/'.$bump)) {
-	  exec('rsync '.USER_IMAGEDIR.'/'.$bump.' '.BROADCASTCACHEDIR.'/'.$bump);
 	  fputs($fp, '      <img src="'.REMOTEDIR.'/cache/'.$bump.'" alt="'.htmlspecialchars('Bump - '.$image['category'], ENT_QUOTES, 'UTF-8').'" dur="'.BUMPDURATION.'s" region="content" fill="remove" erase="whenDone" />'.chr(13).chr(10));
 	}
+
       }
 
       if ($image['template'] != 'video.xsl') {
@@ -142,12 +146,11 @@
 	$current_cat = $image['category'];
 	$bump = $image['category'].'.png';
 	if (file_exists(USER_IMAGEDIR.'/'.$bump)) {
-	  exec('rsync '.USER_IMAGEDIR.'/'.$bump.' '.BROADCASTCACHEDIR.'/'.$bump);
-	  fputs($fp, '      <img src="'.REMOTEDIR.'/cache/'.$bump.'" alt="'.htmlspecialchars('Bump - '.$image['category'], ENT_QUOTES, 'UTF-8').'" dur="'.BUMPDURATION.'s" />'.chr(13).chr(10));
+	  fputs($fp, '      <img src="'.REMOTEDIR.'/cache/'.substr($bump, 0, -3).'jpg" alt="'.htmlspecialchars('Bump - '.$image['category'], ENT_QUOTES, 'UTF-8').'" dur="'.BUMPDURATION.'s" />'.chr(13).chr(10));
 	}
       }
       if ($image['template'] != 'video.xsl') {
-        fputs($fp, '      <img src="'.$image['src'].'" alt="'.htmlspecialchars($image['title'], ENT_QUOTES, 'UTF-8').'" dur="'.$image['dur'].'s" region="content" fill="remove" erase="whenDone" />'.chr(13).chr(10));
+        fputs($fp, '      <img src="'.substr($image['src'], 0, -3).'jpg" alt="'.htmlspecialchars($image['title'], ENT_QUOTES, 'UTF-8').'" dur="'.$image['dur'].'s" region="content" fill="remove" erase="whenDone" />'.chr(13).chr(10));
       } else {
 //        fputs($fp, '      <video src="'.htmlspecialchars($image['title'], ENT_QUOTES, 'UTF-8').'" alt="Intermezzo" dur="'.$image['dur'].'s" region="content" fill="remove" erase="whenDone" />'.chr(13).chr(10));
       }
@@ -162,16 +165,19 @@
   if (!file_exists($tmpdirectory)) {
     exec('mkdir '.$tmpdirectory);
   }
+
+  exec('/usr/bin/mogrify -resize '.WEBRESOLUTIONW.'x'.WEBRESOLUTIONH.' -format jpg '.$tmpdirectory.'/*.png');
   exec('mv -u '.$tmpdirectory.'/*.smil '.BROADCASTDIR.'/.');
   exec('mv -u '.$tmpdirectory.'/*.html '.BROADCASTDIR.'/.');
-//  exec('mv -u '.$tmpdirectory.'/*.png '.BROADCASTCACHEDIR.'/.');
+  exec('mv -u '.$tmpdirectory.'/*.jpg '.BROADCASTCACHEDIR.'/.');
+  exec('mv -u '.$tmpdirectory.'/*.png '.BROADCASTCACHEDIR.'/.');
   exec('ln -sf /home/tv/broadcast/'.date('Y-m-d', $now).'.smil /home/tv/broadcast.smil');
 
 //  exec('/usr/bin/sudo -u broadcast ssh tv@'.REMOTEHOST.' ln -sf '.REMOTEDIR.'/'.date('Y-m-d', $now).'.smil broadcast.smil');
 //  exec('/usr/bin/sudo -u broadcast fusermount -u '.BROADCASTDIR);
 //  exec('/usr/bin/sudo -u broadcast ssh tv@'.REMOTEHOST.' ln -sf '.REMOTEDIR.'/'.date('Y-m-d', $now).'.smil broadcast.smil');
   
-//  exec('rm -rf '.$tmpdirectory);
+  exec('rm -rf '.$tmpdirectory);
 
   header('Location: index.php');
 ?>

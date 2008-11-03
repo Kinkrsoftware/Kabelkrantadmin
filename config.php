@@ -15,5 +15,7 @@
   define ('REMOTEDIR', 'broadcast');
   define ('RESOLUTIONW', '1024');
   define ('RESOLUTIONH', '768');
+  define ('WEBRESOLUTIONW', '400');
+  define ('WEBRESOLUTIONH', '300');
   define ('EMERGENCY', false);
 ?>

@@ -100,7 +100,7 @@
 
 	$seen = 0;
 	
-	if (($query1 = sqlite_query($db, 'SELECT count(contentid) FROM content_seens, editors WHERE contentid='.$entry['content.id'].' AND content_seens.editorid = editors.id AND login=\''.sqlite_escape_string($_SERVER['PHP_AUTH_USER']).'\'')) !== false ) {
+	if (($query1 = sqlite_query($db, 'SELECT count(contentid) FROM content_seens, editors WHERE contentid='.$entry['content.id'].' AND content_seens.editorid = editors.id AND login=\''.sqlite_escape_string($_SERVER['REMOTE_USER']).'\'')) !== false ) {
 	   $seen = sqlite_fetch_all($query1, SQLITE_ASSOC);
 	   $seen = $seen[0]['count(contentid)'];
 	}

@@ -184,13 +184,12 @@
 
 
   function checkandbroadcast($safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $para, $photo, $template, $category, $dir='', $filename='') {
-
     $filename = ($filename!=''?$filename:md5($title.$para.$photo.$template.$category));
     $dir = ($dir!=''?$dir:PREVIEWDIR);
     $pngfile = $dir.'/'.$filename.'.png';
     $pngremote = BROADCASTCACHEDIR.'/'.$filename.'.png';
     
-    if (!file_exists($pngfile) || !file_exists($pngremote)) {
+    if (!(file_exists($pngfile) || file_exists($pngremote))) {
       $category = ($category!=''?$category:'0');
       
       $db = sqlite_open(DATABASE, 0666, $sqlerror);
@@ -201,9 +200,9 @@
 
       if (count($qresult)>=1) {
         if ($qresult[0]['content_category_image.title']=='') {
-	  $newfilename = checkandpreview($safebox, $width, $height, $format='png', $title, $para, $photo, TEMPLATEDIR.'/'.$template, $dir, $filename, $qresult[0]['content_category.title']);
+	  $newfilename = checkandpreview($safebox, $width, $height, $format, $title, $para, $photo, TEMPLATEDIR.'/'.$template, $dir, $filename, $qresult[0]['content_category.title']);
         } else {
-	  $newfilename = checkandpreview($safebox, $width, $height, $format='png', $title, $para, $photo, TEMPLATEDIR.'/'.$template, $dir, $filename,
+	  $newfilename = checkandpreview($safebox, $width, $height, $format, $title, $para, $photo, TEMPLATEDIR.'/'.$template, $dir, $filename,
 	                                 $qresult[0]['content_category.title'],
 			                 $qresult[0]['content_category_image.photo'],
     			                 $qresult[0]['content_category_image.width'],
@@ -212,14 +211,15 @@
 			                 $qresult[0]['content_category_image.y']);
         }
       }
-    } 
+    }
+    
     return $filename;
   }
 
   function checkandpreview($safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $para, $photo, $template, $dir='', $filename='', $cat_title='', $cat_photo='', $cat_width=0, $cat_height=0, $cat_x=0, $cat_y=0) {
     $filename = ($filename!=''?$filename:md5($title.$para.$photo.$template.$category));
     $dir = ($dir!=''?$dir:PREVIEWDIR);
-    $file = $dir.'/'.$filename.$format;
+    $file = $dir.'/'.$filename.'.png';
 
     if (!file_exists($file)) {
           $category_xml = '<category><title>'.strtoupper($cat_title).'</title><img><src>'.($cat_photo!=''?USER_IMAGEDIR.'/'.$cat_photo:'').'</src>'.
@@ -256,9 +256,13 @@
 
       $xml = null;
 
-      if ($format == 'png') {
-	      $debug = shell_exec('/usr/bin/inkscape -z --file='.$svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file.' 2>&1 1>/dev/null');
+      $debug = shell_exec('/usr/bin/inkscape -z --file='.$svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file.' 2>&1 1>/dev/null');
+
+      if ($format != 'png') {
+	      shell_exec('/usr/bin/convert -format '.$format.' '.$file);
       }
+
+
       unlink($svgfile);
      }
      return $filename;

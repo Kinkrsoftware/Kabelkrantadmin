@@ -13,7 +13,7 @@
     $query = sqlite_query($db, 'SELECT start, end, enabled FROM content_run WHERE contentid = '.$_GET['databaseid'].';');
     $result1 = sqlite_fetch_all($query, SQLITE_ASSOC);
 
-    $query = sqlite_query($db, 'INSERT INTO content_seens (contentid, editorid) VALUES ('.$_GET['databaseid'].', (SELECT id FROM editors WHERE login=\''.sqlite_escape_string($_SERVER['PHP_AUTH_USER']).'\'));');
+    $query = sqlite_query($db, 'INSERT INTO content_seens (contentid, editorid) VALUES ('.$_GET['databaseid'].', (SELECT id FROM editors WHERE login=\''.sqlite_escape_string($_SERVER['REMOTE_USER']).'\'));');
     sqlite_close($db);
     if (count($result) > 0) {
       newdocument();
@@ -95,8 +95,8 @@
       
       $query = sqlite_query($db, 'SELECT editors.login FROM content_editor, editors WHERE content_editor.editorid=editors.id AND content_editor.contentid='.$_SESSION['document']['databaseid'].' ORDER BY content_editor.id DESC LIMIT 1;');
 
-      if (($result = sqlite_fetch_all($query, SQLITE_ASSOC)) === false || ($result !== false && $result[0]['editors.login'] != $_SERVER['PHP_AUTH_USER'])) {
-         sqlite_query($db, 'INSERT INTO content_editor (contentid, editorid) VALUES ('.$_SESSION['document']['databaseid'].', (SELECT id FROM editors WHERE login=\''.sqlite_escape_string($_SERVER['PHP_AUTH_USER']).'\'));');
+      if (($result = sqlite_fetch_all($query, SQLITE_ASSOC)) === false || ($result !== false && $result[0]['editors.login'] != $_SERVER['REMOTE_USER'])) {
+         sqlite_query($db, 'INSERT INTO content_editor (contentid, editorid) VALUES ('.$_SESSION['document']['databaseid'].', (SELECT id FROM editors WHERE login=\''.sqlite_escape_string($_SERVER['REMOTE_USER']).'\'));');
       }
     }
     
