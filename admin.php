@@ -117,5 +117,7 @@
 	</fieldset>
      </form>
 
+     <i>Wanneer er serieuze problemen zijn, kan er altijd gebeld worden met +31 87 8700579. Kinkrsoftware/Stefan de Konink;<br />
+	Jeroen heeft ook een noodnummer.</i>
 </body>
 </html>
