@@ -172,7 +172,6 @@
     $_SESSION['document']['activeid']=0;
   }
 
-
   function checkandgenerate($id=0, $safebox=0, $width=269, $height=200, $format='png') {
     $title = passive('text_title', $id);
     $para = passive('text_content', $id);
@@ -187,9 +186,8 @@
     $filename = ($filename!=''?$filename:md5($title.$para.$photo.$template.$category));
     $dir = ($dir!=''?$dir:PREVIEWDIR);
     $pngfile = $dir.'/'.$filename.'.png';
-    $pngremote = BROADCASTCACHEDIR.'/'.$filename.'.png';
     
-    if (!(file_exists($pngfile) || file_exists($pngremote))) {
+    if (!file_exists($pngfile)) {
       $category = ($category!=''?$category:'0');
       
       $db = sqlite_open(DATABASE, 0666, $sqlerror);

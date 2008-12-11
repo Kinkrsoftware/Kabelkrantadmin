@@ -73,7 +73,12 @@
     $dur = $entry['content_text.duration'];
     $id = $entry['content_text.id'];
 
-    $file = checkandbroadcast($safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $content, $photo, $template, $category, $dir=$tmpdirectory);
+    $file = md5($title.$para.$photo.$template.$category).'.png';
+    $location = BROADCASTCACHEDIR.'/'.$hash;
+
+    if (!file_exists($location)) {
+	    $file = checkandbroadcast($safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $content, $photo, $template, $category, $dir=$tmpdirectory);
+    }
 
     $out[] = array('title'=>($title==''?($photo==''?'Naamloos':$photo):$title), 'src'=>REMOTEDIR.'/cache/'.$file.'.png', 'dur'=>$dur, 'template'=>$template, 'category'=>$category_title);
   }
