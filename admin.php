@@ -22,9 +22,10 @@
 	
         $db = sqlite_open(DATABASE, 0666, $sqlerror);
         sqlite_query('BEGIN;', $db);
-
+	sqlite_query($db, 'DELETE FROM editors WHERE login = \''.$login.'\';');
         sqlite_query($db, 'INSERT INTO editors (login, passphrase, surname, addictions, givenname) VALUES (\''.$login.'\', \''.$passphrase.'\', \''.$surname.'\', \''.$addictions.'\', \''.$givenname.'\');');
 	sqlite_query('COMMIT;', $db);
+	sqlite_close($db);
 
 	$fp = fopen('.htdigest', 'a');
 	fwrite($fp, $login.':Kabelkrantadmin:'.$passphrase."\n");
@@ -32,6 +33,31 @@
 	fclose($fp);
 //	header('Location: '.$_SERVER['PHP_SELF']);
     }
+  } else if ($_POST['action']=='Verwijder Gebruiker') {
+  	$login = trim($_POST['newuser']);
+
+	if ($login != '') {
+		clearstatcache();
+		/* we halen de gebruiker niet uit de database, omdat de refentiele integriteit dat kwijt raakt */
+		$db = sqlite_open(DATABASE, 0666, $sqlerror);
+	        sqlite_query('BEGIN;', $db);
+	        sqlite_query($db, 'UPDATE editors SET passphrase = \'\' WHERE login = \''.$login.'\';');
+		sqlite_query('COMMIT;', $db);
+		sqlite_close($db);
+
+		$needle = $login.':';
+		$nlen   = strlen($needle);
+		$fp = fopen('.htdigest', 'r');
+		$contents = '';
+		while (!feof($fp)) {
+		  $tmp = fgets($fp);
+		  if (strlen($tmp) > $nlen && substr_compare($tmp, $needle, 0, $nlen, TRUE) != 0) {
+		  	$contents .= $tmp;
+		  }
+		}
+		fclose($fp);
+		file_put_contents('.htdigest', $contents, LOCK_EX);
+	}
   }
 
   
@@ -70,6 +96,7 @@
 	   <label for="addictions" style="display: block; width: 110px; float: left; clear: both;">Tussenvoegsels:</label> <input id="addictions" name="addictions" type="text" />
 	   <label for="surname" style="display: block; width: 110px; float: left; clear: both;">Achternaam:</label> <input id="surname" name="surname" type="text" />
 	   <input name="action" type="submit" value="Maak Gebruiker" class="button" style="clear: both; width: auto;" />
+	   <input name="action" type="submit" value="Verwijder Gebruiker" class="button" style="width: auto;" />
         </fieldset>
      </form>
      <form method="post">
@@ -90,7 +117,7 @@
 
 	     <?php 
 		$db = sqlite_open(DATABASE, 0666, $sqlerror);
-		$query = sqlite_query($db, 'SELECT login, givenname, addictions, surname FROM editors ORDER BY surname;');
+		$query = sqlite_query($db, 'SELECT login, givenname, addictions, surname FROM editors WHERE passphrase <> \'\' ORDER BY surname;');
                 $result = sqlite_fetch_all($query, SQLITE_ASSOC);
                 sqlite_close($db);
 		if (is_array($result)) {
