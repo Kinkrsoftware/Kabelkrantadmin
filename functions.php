@@ -256,6 +256,9 @@
 
       $debug = shell_exec('/usr/bin/inkscape -z --file='.$svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file.' 2>&1 1>/dev/null');
 
+	//echo $debug;
+	//exit;
+
       if ($format != 'png') {
 	      shell_exec('/usr/bin/convert -format '.$format.' '.$file);
       }

@@ -58,6 +58,35 @@
 		fclose($fp);
 		file_put_contents('.htdigest', $contents, LOCK_EX);
 	}
+  } else if ($_POST['action']=='Wijzig Wachtwoord') {
+  	$login = trim($_POST['curuser']);
+	$password = trim($_POST['newpassword']);
+
+	if ($login != '' && $password != '') {
+		$passphrase = md5($login.':Kabelkrantadmin:'.$password);
+		clearstatcache();
+		/* we halen de gebruiker niet uit de database, omdat de refentiele integriteit dat kwijt raakt */
+		$db = sqlite_open(DATABASE, 0666, $sqlerror);
+	        sqlite_query('BEGIN;', $db);
+	        sqlite_query($db, 'UPDATE editors SET passphrase = \''.$passphrase.'\' WHERE login = \''.$login.'\';');
+		sqlite_query('COMMIT;', $db);
+		sqlite_close($db);
+
+		$needle = $login.':';
+		$nlen   = strlen($needle);
+		$fp = fopen('.htdigest', 'r');
+		$contents = '';
+		while (!feof($fp)) {
+		  $tmp = fgets($fp);
+		  if (strlen($tmp) > $nlen && substr_compare($tmp, $needle, 0, $nlen, TRUE) != 0) {
+		  	$contents .= $tmp;
+		  }
+		}
+		fclose($fp);
+		$contents.=$login.':Kabelkrantadmin:'.$passphrase."\n";
+		file_put_contents('.htdigest', $contents, LOCK_EX);
+	
+	}
   }
 
   
