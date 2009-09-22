@@ -4,17 +4,24 @@
 
   require_once('functions.php');
 
+  $dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
 
   if (isset($_GET['databaseid']) && is_numeric($_GET['databaseid']) && $_GET['databaseid'] > 0) {
-    $db = sqlite_open(DATABASE, 0666, $sqlerror);
-    $query = sqlite_query($db, 'SELECT template, category, duration, photo, title, content FROM content, content_text WHERE content.id='.$_GET['databaseid'].' AND content.id = content_text.contentid;');
-//  $query = sqlite_query($db, 'SELECT start, end, template, category, duration, photo, title, content FROM content, content_text WHERE content.id='.$_GET['databaseid'].' AND content.id = content_text.contentid;');
-    $result = sqlite_fetch_all($query, SQLITE_ASSOC);
-    $query = sqlite_query($db, 'SELECT start, end, enabled FROM content_run WHERE contentid = '.$_GET['databaseid'].';');
-    $result1 = sqlite_fetch_all($query, SQLITE_ASSOC);
+    $stmt = $dbh->prepare('SELECT template, category, duration, photo, title, content FROM content, content_text WHERE content.id=:databaseid AND content.id = content_text.contentid;');
+    $stmt->bindParam(':databaseid', $_GET['databaseid'], PDO::PARAM_INT);
+    $stmt->execute();
+    $result = $stmt->fetchAll();
 
-    $query = sqlite_query($db, 'INSERT INTO content_seens (contentid, editorid) VALUES ('.$_GET['databaseid'].', (SELECT id FROM editors WHERE login=\''.sqlite_escape_string($_SERVER['REMOTE_USER']).'\'));');
-    sqlite_close($db);
+    $query = $dbh->prepare('SELECT start, end, enabled FROM content_run WHERE contentid = :databaseid');
+    $stmt->bindParam(':databaseid', $_GET['databaseid'], PDO::PARAM_INT);
+    $stmt->execute();
+    $result1 = $stmt->fetchAll();
+
+    $query = $dbh->prepare('INSERT INTO content_seens (contentid, editorid) VALUES (:databaseid, (SELECT id FROM editors WHERE login=:remoteuser))');
+    $stmt->bindParam(':databaseid', $_GET['databaseid'], PDO::PARAM_INT);
+    $stmt->bindParam(':remoteuser', $_SERVER['REMOTE_USER'], PDO::PARAM_STR);
+    $stmt->execute();
+    
     if (count($result) > 0) {
       newdocument();
       $_SESSION['document']['databaseid']=$_GET['databaseid'];
@@ -58,50 +65,76 @@
   post2sessionactive('text_photo');
 
   if ($_POST['action']==ACT_SAVE) {
-    $db = sqlite_open(DATABASE, 0666, $sqlerror);
-    
-    sqlite_query('BEGIN;', $db);
+    $dbh->beginTransaction();
 
     $result = array();
 
     if (isset($_SESSION['document']['databaseid'])) {
-      sqlite_query($db, 'DELETE FROM content_text WHERE contentid='.$_SESSION['document']['databaseid'].';');
-//      sqlite_query($db, 'DELETE FROM content WHERE id='.$_SESSION['document']['databaseid'].';');
-      sqlite_query($db, 'UPDATE content SET state=1 WHERE id='.$_SESSION['document']['databaseid'].';');
+	$query = $dbh->prepare('DELETE FROM content_text WHERE contentid = :databaseid');
+        $stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
+	$stmt->execute();
+    
+//      sqlite_query($db, 'DELETE FROM content WHERE id='.$_SESSION['document']['databaseid'].';'); /* even checken waarom dit nodig was */
+
+	$query = $dbh->prepare('UPDATE content SET state=1 WHERE id = %database');
+	$stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
+	$stmt->execute();
     } else {
-        sqlite_query($db, 'INSERT INTO content (state) VALUES (0);');
-        $query = sqlite_query($db, 'SELECT max(id) FROM content WHERE state=0 ORDER BY id DESC;');
-        $result = sqlite_fetch_all($query, SQLITE_ASSOC);
+        $dbh->query('INSERT INTO content (state) VALUES (0);');
+	$stmt = $dbh->query('SELECT max(id) FROM content WHERE state=0 ORDER BY id DESC;');
+	$result = $stmt->fetchAll();
         $_SESSION['document']['databaseid']=$result[0]['max(id)'];
     }
 
     if (!isset($_SESSION['document']['databaseid'])) {
-      sqlite_query($db, 'ROLLBACK;');
+      $dbh->rollBack();
     } else {
       foreach ($_SESSION['document'] as $key => $value) {
         if (is_numeric($key) && $key > 0) {
-	  sqlite_query($db, 'INSERT INTO content_text (contentid, template, category, duration, photo, title, content) VALUES ('.$_SESSION['document']['databaseid'].', \''.sqlite_escape_string(passive('text_template', $key)).'\', \''.sqlite_escape_string(passive('text_category', $key)).'\', \''.sqlite_escape_string(passive('text_duration', $key)).'\', \''.sqlite_escape_string(passive('text_photo', $key)).'\', \''.sqlite_escape_string(passive('text_title', $key)).'\', \''.str_replace('\'', '\\\'', passive('text_content', $key)).'\');');
-	  
+	  $stmt = $dbh->prepare('INSERT INTO content_text (contentid, template, category, duration, photo, title, content) VALUES (:databaseid, :text_template, :text_category, :text_duration, :text_photo, :text_title, :text_content)');
+
+//	  .'\', \''.str_replace('\'', '\\\'', passive('text_content', $key)).'\')');
+
+	  $stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
+	  $stmt->bindParam(':text_template', passive('text_template', $key), PDO::PARAM_STR);
+	  $stmt->bindParam(':text_category', passive('text_category', $key), PDO::PARAM_STR);
+	  $stmt->bindParam(':text_duration', passive('text_duration', $key), PDO::PARAM_INT);
+	  $stmt->bindParam(':text_photo', passive('text_photo', $key), PDO::PARAM_STR);
+	  $stmt->bindParam(':text_title', passive('text_title', $key), PDO::PARAM_STR);
+	  $stmt->bindParam(':text_content', passive('text_content', $key), PDO::PARAM_STR);
 	}
       }
-
-      sqlite_query($db, 'DELETE FROM content_run WHERE contentid='.$_SESSION['document']['databaseid'].';');
+      $stmt = $dbh->prepare('DELETE FROM content_run WHERE contentid = :databaseid');
+      $stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
+      $stmt->execute();
       
       foreach ($_SESSION['document']['run'] as $entry) {
-        sqlite_query($db, 'INSERT INTO content_run (contentid, start, end, enabled) VALUES ('.$_SESSION['document']['databaseid'].', '.$entry['content_start'].', '.$entry['content_end'].', '.($entry['enabled']?1:0).');');
+        $stmt = $dbh->prepare('INSERT INTO content_run (contentid, start, end, enabled) VALUES (:databaseid, :start, :end, :enabled)');
+	$stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
+	$stmt->bindParam(':start', $entry['content_start'], PDO::PARAM_INT);
+	$stmt->bindParam(':end', $entry['content_end'], PDO::PARAM_INT);
+	$stmt->bindParam(':enabled', ($entry['enabled']?1:0), PDO::PARAM_INT);
+	$stmt->execute();
       }
-
-      $query = sqlite_query($db, 'DELETE FROM content_seens WHERE contentid = '.$_SESSION['document']['databaseid'].';');
       
-      $query = sqlite_query($db, 'SELECT editors.login FROM content_editor, editors WHERE content_editor.editorid=editors.id AND content_editor.contentid='.$_SESSION['document']['databaseid'].' ORDER BY content_editor.id DESC LIMIT 1;');
+      $stmt = $dbh->prepare('DELETE FROM content_seens WHERE contentid = :databaseid');
+      $stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
+      $stmt->execute();
+     
+      $stmt = $dbh->prepare('SELECT editors.login FROM content_editor, editors WHERE content_editor.editorid=editors.id AND content_editor.contentid = :databaseid ORDER BY content_editor.id DESC LIMIT 1');
+      $stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
+      $stmt->execute();
 
-      if (($result = sqlite_fetch_all($query, SQLITE_ASSOC)) === false || ($result !== false && $result[0]['editors.login'] != $_SERVER['REMOTE_USER'])) {
-         sqlite_query($db, 'INSERT INTO content_editor (contentid, editorid) VALUES ('.$_SESSION['document']['databaseid'].', (SELECT id FROM editors WHERE login=\''.sqlite_escape_string($_SERVER['REMOTE_USER']).'\'));');
+      if (($result = $stmt->fetchAll()) === false || ($result !== false && $result[0]['editors.login'] != $_SERVER['REMOTE_USER'])) {
+         $stmt = $dbh->prepare('INSERT INTO content_editor (contentid, editorid) VALUES (:databaseid, (SELECT id FROM editors WHERE login = :remoteuser))');
+	 $stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
+	 $stmt->bindParam(':databaseid', $_SERVER['REMOTE_USER'], PDO::PARAM_STR);
+	 $stmt->execute();
       }
     }
-    
-    sqlite_query($db, 'COMMIT;');
-    sqlite_close($db);
+   
+    $dbh->commit();
+    $dbh = null;
     header('Location: '.$_SERVER['PHP_SELF'].'?databaseid='.$_SESSION['document']['databaseid']);
     exit;
   } 
@@ -185,7 +218,12 @@ foreach ($_SESSION['document'] as $key => $value) {
 	<fieldset>
 	  <legend><?php echo TEMPLATE; ?></legend>
 	  <?php echo dirtoselect('text_template', TEMPLATEDIR, active('text_template')); ?>
-	  <?php echo dbtoselect('text_category', 'SELECT content_category_image.id, content_category.title, content_category_image.title FROM content_category, content_category_image WHERE content_category.id=content_category_image.categoryid'.(isset($_SESSION['category']) ? ' AND content_category.title = "'.$_SESSION['category'].'"' : '').' ORDER BY content_category.title, content_category_image.title;', active('text_category')); ?> <a href="template-toevoegen.php"><?php echo NEWIMAGE; ?></a>
+	  <?php 
+		$stmt = $dbh->prepare('SELECT content_category_image.id, content_category.title, content_category_image.title FROM content_category, content_category_image WHERE content_category.id=content_category_image.categoryid'.(isset($_SESSION['category']) ? ' AND content_category.title = :category' : '').' ORDER BY content_category.title, content_category_image.title;'
+		$stmt->bindParam(':category', $_SESSION['category'], PDO::PARAM_STR);
+		$stmt->execute();
+		$qresult = $stmt->fetchAll();
+	  	echo dbtoselect('text_category', $qresult, active('text_category')); ?> <a href="template-toevoegen.php"><?php echo NEWIMAGE; ?></a>
 	</fieldset>
 	<fieldset class="datetime"><legend><?php echo LENGTH; ?></legend><?php echo timetoinput('text_duration', active('text_duration')); ?></fieldset>
 	<fieldset>

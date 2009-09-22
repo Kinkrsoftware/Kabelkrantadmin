@@ -23,11 +23,13 @@
   if (!is_numeric(active('h', 'newtemplate'))) paste2sessionactive('h', 'newtemplate', 840);
   if (!is_numeric(active('w', 'newtemplate'))) paste2sessionactive('w', 'newtemplate', 1120);
 
+  $dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
+
   if (active('category', 'newtemplate') != '') {
-    $db = sqlite_open(DATABASE, 0666, $sqlerror);
-    $query = sqlite_query($db, 'SELECT title FROM content_category WHERE content_category.id='.active('category', 'newtemplate').';');
-    $qresult = sqlite_fetch_all($query, SQLITE_ASSOC);
-    sqlite_close($db);
+    $stmt = $dbh->prepare('SELECT title FROM content_category WHERE content_category.id=:contentcategoryid');
+    $stmt->bindParam(':contentcategoryid', active('category', 'newtemplate'), PDO::PARAM_INT);
+    $stmt->execute();
+    $qresult = $stmt->fetchAll();
   }
 
   $preview = checkandpreview($safebox=1, $width=269, $height=200, $format='png', 
@@ -38,21 +40,29 @@
 			       active('h', 'newtemplate'), active('x', 'newtemplate'), active('y', 'newtemplate'));
 
    if ($_POST['action']==ACT_SAVE && active('title', 'newtemplate')!='' && active('photo', 'newtemplate')!='' && active('category', 'newtemplate')!='') {
-    $db = sqlite_open(DATABASE, 0666, $sqlerror);
-    sqlite_query('BEGIN;', $db);
-    sqlite_query($db, 'INSERT INTO content_category_image(categoryid, title, photo, width, height, x, y) VALUES ('.active('category', 'newtemplate').', \''.sqlite_escape_string(active('title', 'newtemplate')).'\', \''.sqlite_escape_string(active('photo', 'newtemplate')).'\', '.active('w', 'newtemplate').', '.active('h', 'newtemplate').', '.active('x', 'newtemplate').', '.active('y', 'newtemplate').');');
-    sqlite_query($db, 'COMMIT;');
-    sqlite_close($db);
+    $dbh->beginTransaction();
+    $stmt = $dbh->prepare('INSERT INTO content_category_image(categoryid, title, photo, width, height, x, y) VALUES (:categoryid, :title, :photo, :width, :height, :x, :y)';
+    $stmt->bindParam(':categoryid', active('category', 'newtemplate'), PDO::PARAM_INT);
+    $stmt->bindParam(':title', active('title', 'newtemplate'), PDO::PARAM_STR);
+    $stmt->bindParam(':photo', active('photo', 'newtemplate'), PDO::PARAM_STR);
+    $stmt->bindParam(':width', active('width', 'newtemplate'), PDO::PARAM_INT);
+    $stmt->bindParam(':height', active('height', 'newtemplate'), PDO::PARAM_INT);
+    $stmt->bindParam(':x', active('x', 'newtemplate'), PDO::PARAM_INT);
+    $stmt->bindParam(':y', active('y', 'newtemplate'), PDO::PARAM_INT);
+    $dbh->commit();
+    $dbh = null;
     header('Location: toevoegen.php');
     exit;
   }
 
   if ($_POST['action']==ACT_BACK) {
+    $dbh = null;
     header('Location: toevoegen.php');
     exit;
   }
 
   if (isset($_GET['debug'])) {
+    $dbh = null;
     header('Content-Type: text/plain;');
     print_r($_SESSION);
     print_r($_POST);
@@ -82,7 +92,12 @@
       </fieldset>
       <fieldset>
         <legend><?php echo CATEGORY; ?></legend>
-        <?php echo dbtoselect('category', 'SELECT content_category.id, content_category.title FROM content_category ORDER BY content_category.title', active('category', 'newtemplate'), true); ?>
+        <?php 
+	  $stmt = $dbh->query('SELECT content_category.id, content_category.title FROM content_category ORDER BY content_category.title');
+	  $stmt->execute();
+	  $qresult = $stmt->fetchAll();
+	  echo dbtoselect('category', $qresult, active('category', 'newtemplate'), true);
+	?>
       </fieldset>
       <fieldset>
         <legend><?php echo TITLE; ?></legend>

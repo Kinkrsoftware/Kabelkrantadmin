@@ -3,19 +3,22 @@
 
 	$now = time() - (7 * 24 * 60 * 60);
 	$totable = array();
-
-	$db = sqlite_open(DATABASE, 0666, $sqlerror);
+	
+	$dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
 	for ($i=0; $i<=60; $i++) {
 		$start = $now;
 		$end = $now;
+		
+		$stmt = $dbh->prepare('SELECT sum(content_text.duration) AS totaal FROM content_run, content, content_text WHERE content_run.start <= :start AND content_run.end >= :end AND content.id=content_run.contentid AND content.id=content_text.contentid;');
+		$stmt->bindParam(':start', $start, PDO::PARAM_INT);
+		$stmt->bindParam(':end', $end, PDO::PARAM_INT);
+		$stmt->execute();
+		$result = $stmt->fetchAll();
 
-		$query = sqlite_query($db, 'SELECT sum(content_text.duration) FROM content_run, content, content_text WHERE content_run.start <= '.$start.' AND content_run.end >= '.$end.' AND content.id=content_run.contentid AND content.id=content_text.contentid;');
-		$result = sqlite_fetch_all($query, SQLITE_ASSOC);
-		$totable[$i] = $result[0]['sum(content_text.duration)'];
+		$totable[$i] = $result[0]['totaal'];
 		$now += 43200;
 	}
-	
-	sqlite_close($db);
+        $dbh = null;
 
 	$im = imagecreate(600,200);
 	$background_color = imagecolorallocate($im, 255, 255, 255);

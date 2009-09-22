@@ -7,7 +7,8 @@
     $now = $_GET['now'];
   }
 
-  $db = sqlite_open(DATABASE, 0666, $sqlerror);
+  $dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
+
   if (isset($_GET['week'])) {
     $start = $now-(7*24*60*60);
   } else {
@@ -22,20 +23,31 @@
   $adsintro = array();
   $adsoutro = array();
 	 
-   $queryding = 'SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= '.$start.' AND content_run.end >= '.$end.' AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Vandaag\' ORDER BY content_text.id, content.start, content.end ASC;';
-   $query = sqlite_query($db, $queryding);
-   $vandaagresult = sqlite_fetch_all($query, SQLITE_ASSOC);
-   $queryding = 'SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= '.$start.' AND content_run.end >= '.$end.' AND content.id = content_run.contentid AND content.id=content_text.contentid AND (content_text.category=\'\' OR (content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id)) AND content_text.template <> \'ng-advertentie.xsl\' AND content_category.title <> \'Vandaag\' AND content_category.title <> \'Colofon\' GROUP BY content_text.id ORDER BY '.(THEMESEQ ? 'content_category_image.categoryid, ':'').'content_text.id, content.start, content.end ASC;';
-   $query = sqlite_query($db, $queryding);
+   
+   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.end >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Vandaag\' ORDER BY content_text.id, content.start, content.end ASC');
+   $stmt->bindParam(':start', $start, PDO::PARAM_INT);
+   $stmt->bindParam(':end', $end, PDO::PARAM_INT);
+   $stmt->execute();
+   $vandaagresult = $stmt->fetchAll();
+
+   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.end >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND (content_text.category=\'\' OR (content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id)) AND content_text.template <> \'ng-advertentie.xsl\' AND content_category.title <> \'Vandaag\' AND content_category.title <> \'Colofon\' GROUP BY content_text.id ORDER BY '.(THEMESEQ ? 'content_category_image.categoryid, ':'').'content_text.id, content.start, content.end ASC');
+   $stmt->bindParam(':start', $start, PDO::PARAM_INT);
+   $stmt->bindParam(':end', $end, PDO::PARAM_INT);
+   $stmt->execute();
+   $contentresult = $stmt->fetchAll();
   
-   $contentresult = sqlite_fetch_all($query, SQLITE_ASSOC);
-   $queryding = 'SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= '.$start.' AND content_run.end >= '.$end.' AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Colofon\' ORDER BY content_text.id, content.start, content.end ASC;';
-  $query = sqlite_query($db, $queryding);
- 
-  $colofonresult = sqlite_fetch_all($query, SQLITE_ASSOC);
+   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.end >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Colofon\' ORDER BY content_text.id, content.start, content.end ASC');
+   $stmt->bindParam(':start', $start, PDO::PARAM_INT);
+   $stmt->bindParam(':end', $end, PDO::PARAM_INT);
+   $stmt->execute();
+   $colofonresult = $stmt->fetchAll();
+  
   if (!isset($_GET['no-ads'])) {
-    $query = sqlite_query($db, 'SELECT content_text.id, content_text.template, content_text.category, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text WHERE content_run.start <= '.$start.' AND content_run.end >= '.$end.' AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_text.template = \'ng-advertentie.xsl\' ORDER BY content_text.id, content.start, content.end ASC;');
-    $adsresult = sqlite_fetch_all($query, SQLITE_ASSOC);
+    $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text WHERE content_run.start <= :start AND content_run.end >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_text.template = \'ng-advertentie.xsl\' ORDER BY content_text.id, content.start, content.end ASC');
+    $stmt->bindParam(':start', $start, PDO::PARAM_INT);
+    $stmt->bindParam(':end', $end, PDO::PARAM_INT);
+    $stmt->execute();
+    $adsresult = $stmt->fetchAll();
   
     if (count($adsresult) > 0) {
     	
@@ -47,8 +59,6 @@
     }
 
   }
-  sqlite_close($db);
-
 
   $result = array_merge($vandaagresult, $contentresult, $colofonresult, $adsintro, $adsresult, $adsoutro);
 
@@ -77,11 +87,12 @@
     $location = BROADCASTCACHEDIR.'/'.$file.'.png';
 
     if (!file_exists($location)) {
-	    $file = checkandbroadcast($safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $content, $photo, $template, $category, $dir=$tmpdirectory);
+	    $file = checkandbroadcast($dbh, $safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $content, $photo, $template, $category, $dir=$tmpdirectory);
     }
 
     $out[] = array('title'=>($title==''?($photo==''?'Naamloos':$photo):$title), 'src'=>REMOTEDIR.'/cache/'.$file.'.png', 'dur'=>$dur, 'template'=>$template, 'category'=>$category_title);
   }
+  $dbh = null; /* Database niet meer nodig */
 
   reset($out);
 

@@ -10,11 +10,13 @@
   $now = time();
   $start = $now;
   $end = $now;
-
-  $db = sqlite_open(DATABASE, 0666, $sqlerror);
-  $query = sqlite_query($db, 'SELECT content_text.id, title, content FROM content_run, content, content_text WHERE content_run.start <= '.$start.' AND content_run.end >= '.$end.' AND content.id=content_run.contentid AND content.id=content_text.contentid AND (title <> \'\' AND content <> \'\');');
-  $result = sqlite_fetch_all($query, SQLITE_ASSOC);
-  sqlite_close($db);
+  $dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
+  $stmt = $dbh->prepare('SELECT content_text.id, title, content FROM content_run, content, content_text WHERE content_run.start <= :start AND content_run.end >= :end AND content.id=content_run.contentid AND content.id=content_text.contentid AND (title <> \'\' AND content <> \'\');');
+  $stmt->bindParam(':start', $start, PDO::PARAM_INT);
+  $stmt->bindParam(':end', $end, PDO::PARAM_INT);
+  $stmt->execute();
+  $result = $stmt->fetchAll();
+  $dbh = null;
 
 ?>
 <?xml version="1.0" encoding="UTF-8"?>

@@ -14,18 +14,23 @@
     $password = trim($_POST['password']);
 
     if ($login != '' && $givenname != '')  {
-        $login = sqlite_escape_string($login);
-	$givenname = sqlite_escape_string($givenname);
-	$surname = sqlite_escape_string($surname);
-	$addictions = sqlite_escape_string($addictions);
 	$passphrase = md5($login.':Kabelkrantadmin:'.$password);
-	
-        $db = sqlite_open(DATABASE, 0666, $sqlerror);
-        sqlite_query('BEGIN;', $db);
-	sqlite_query($db, 'DELETE FROM editors WHERE login = \''.$login.'\';');
-        sqlite_query($db, 'INSERT INTO editors (login, passphrase, surname, addictions, givenname) VALUES (\''.$login.'\', \''.$passphrase.'\', \''.$surname.'\', \''.$addictions.'\', \''.$givenname.'\');');
-	sqlite_query('COMMIT;', $db);
-	sqlite_close($db);
+
+    	$dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
+	$dbh->beginTransaction();
+
+	$stmt = $dbh->prepare('DELETE FROM editors WHERE login = :login');
+	$stmt->bindParam(':login', $login, PDO::PARAM_STR);
+	$stmt->execute();
+
+	$stmt = $dbh->prepare('INSERT INTO editors (login, passphrase, surname, addictions, givenname) VALUES (:login, :passphrase, :surname, :addictions, :givenname)');
+	$stmt->bindParam(':login', $login, PDO::PARAM_STR);
+	$stmt->bindParam(':passphrase', $passphrase, PDO::PARAM_STR);
+	$stmt->bindParam(':surname', $surname, PDO::PARAM_STR);
+	$stmt->bindParam(':addictions', $addictions, PDO::PARAM_STR);
+	$stmt->bindParam(':givenname', $givenname, PDO::PARAM_STR);
+	$dbh->commit();
+	$dbh = null;
 
 	$fp = fopen('.htdigest', 'a');
 	fwrite($fp, $login.':Kabelkrantadmin:'.$passphrase."\n");
@@ -39,11 +44,15 @@
 	if ($login != '') {
 		clearstatcache();
 		/* we halen de gebruiker niet uit de database, omdat de refentiele integriteit dat kwijt raakt */
-		$db = sqlite_open(DATABASE, 0666, $sqlerror);
-	        sqlite_query('BEGIN;', $db);
-	        sqlite_query($db, 'UPDATE editors SET passphrase = \'\' WHERE login = \''.$login.'\';');
-		sqlite_query('COMMIT;', $db);
-		sqlite_close($db);
+	    	$dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
+		$dbh->beginTransaction();
+
+		$stmt = $dbh->prepare('UPDATE editors SET passphrase = NULL WHERE login = :login');
+		$stmt->bindParam(':login', $login, PDO::PARAM_STR);
+		$stmt->execute();
+
+		$dbh->commit();
+		$dbh = null;
 
 		$needle = $login.':';
 		$nlen   = strlen($needle);
@@ -66,11 +75,16 @@
 		$passphrase = md5($login.':Kabelkrantadmin:'.$password);
 		clearstatcache();
 		/* we halen de gebruiker niet uit de database, omdat de refentiele integriteit dat kwijt raakt */
-		$db = sqlite_open(DATABASE, 0666, $sqlerror);
-	        sqlite_query('BEGIN;', $db);
-	        sqlite_query($db, 'UPDATE editors SET passphrase = \''.$passphrase.'\' WHERE login = \''.$login.'\';');
-		sqlite_query('COMMIT;', $db);
-		sqlite_close($db);
+	    	$dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
+		$dbh->beginTransaction();
+
+		$stmt = $dbh->prepare('UPDATE editors SET passphrase = :passphrase WHERE login = :login');
+		$stmt->bindParam(':login', $login, PDO::PARAM_STR);
+		$stmt->bindParam(':passphrase', $login, PDO::PARAM_STR);
+		$stmt->execute();
+
+		$dbh->commit();
+		$dbh = null;
 
 		$needle = $login.':';
 		$nlen   = strlen($needle);
@@ -102,20 +116,7 @@
     Welkom op de nieuwe beta-versie van kabelkrantadmin.<br />
     Momenteel worden wat toevoegingen gedaan aan de broncode, het kan zijn
     dat je daar iets van merkt.<br />
-        <?php
-		$now = time();
-		$start = $now;
-		$end = $now;
-			      
-		$db = sqlite_open(DATABASE, 0666, $sqlerror);
-		$query = sqlite_query($db, 'SELECT sum(content_text.duration)  FROM content, content_text WHERE content.id=content_text.contentid AND content.start <= '.$start.' AND content.end >= '.$end.';');
-		$result = sqlite_fetch_all($query, SQLITE_ASSOC);
-
-		$lengte = $result[0]['sum(content_text.duration)'];
-		
-		sqlite_close($db);
-	?>
-     Lengte: <?php echo $lengte; ?>s
+     
      <form method="post">
         <fieldset>
 	   <legend>Gebruiker Toevoegen</legend>
@@ -145,10 +146,11 @@
 	     </tr>
 
 	     <?php 
-		$db = sqlite_open(DATABASE, 0666, $sqlerror);
-		$query = sqlite_query($db, 'SELECT login, givenname, addictions, surname FROM editors WHERE passphrase <> \'\' ORDER BY surname;');
-                $result = sqlite_fetch_all($query, SQLITE_ASSOC);
-                sqlite_close($db);
+	    	$dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
+		$stmt = $dbh->query('SELECT login, givenname, addictions, surname FROM editors WHERE passphrase <> \'\' ORDER BY surname;');
+		$result = $stmt->fetchAll();
+		$dbh = null;
+
 		if (is_array($result)) {
 			foreach ($result as $entry) {
 				echo '<tr><td>'.$entry['givenname'].($entry['addictions']!=''?' '.$entry['addictions']:'').
@@ -173,7 +175,7 @@
 	</fieldset>
      </form>
 
-     <i>Wanneer er serieuze problemen zijn, kan er altijd gebeld worden met +31 87 8700579. Kinkrsoftware/Stefan de Konink;<br />
+     <i>Wanneer er serieuze problemen zijn, kan er altijd gebeld worden met +31 85 7 85 31 85. Kinkrsoftware/Stefan de Konink;<br />
 	Jeroen heeft ook een noodnummer.</i>
 </body>
 </html>

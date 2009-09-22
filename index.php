@@ -13,7 +13,7 @@
    	if ($_GET['category'] == 'None') {
 		unset($_SESSION['category']);
 	} else {
-	   	$_SESSION['category'] = sqlite_escape_string($_GET['category']);
+	   	$_SESSION['category'] = $_GET['category'];
 	}
    } 
 ?>
@@ -34,17 +34,23 @@
 		$now = time();
 		$start = $now;
 		$end = $now;
-			      
-		$db = sqlite_open(DATABASE, 0666, $sqlerror);
+                
+		$dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
+
 		if (isset($_SESSION['category'])) {
-			$select = 'SELECT sum(content_text.duration) FROM content_run, content, content_text, content_category, content_category_image WHERE content_category_image.categoryid = content_category.id AND content_category_image.id = content_text.category AND content_category.title = "'.$_SESSION['category'].'" AND content_run.start <= '.$start.' AND content_run.end >= '.$end.' AND content.id=content_run.contentid AND content.id=content_text.contentid;';
+	                $stmt = $dbh->prepare('SELECT sum(content_text.duration) FROM content_run, content, content_text, content_category, content_category_image WHERE content_category_image.categoryid = content_category.id AND content_category_image.id = content_text.category AND content_category.title = :category AND content_run.start <= :start AND content_run.end >= :end AND content.id=content_run.contentid AND content.id=content_text.contentid;');
+	                $stmt->bindParam(':category', $category, PDO::PARAM_STR);
+	                $stmt->bindParam(':start', $start, PDO::PARAM_INT);
+	                $stmt->bindParam(':end', $end, PDO::PARAM_INT);
+	                $stmt->execute();
 		} else {
-			$select = 'SELECT sum(content_text.duration) FROM content_run, content, content_text WHERE content_run.start <= '.$start.' AND content_run.end >= '.$end.' AND content.id=content_run.contentid AND content.id=content_text.contentid;';
+	                $stmt = $dbh->prepare('SELECT sum(content_text.duration) FROM content_run, content, content_text WHERE content_run.start <= :start AND content_run.end >= :end AND content.id=content_run.contentid AND content.id=content_text.contentid;');
+	                $stmt->bindParam(':start', $start, PDO::PARAM_INT);
+	                $stmt->bindParam(':end', $end, PDO::PARAM_INT);
+	                $stmt->execute();
 		}
 
-		$query = sqlite_query($db, $select);
-		$result = sqlite_fetch_all($query, SQLITE_ASSOC);
-		sqlite_close($db);
+		$result = $stmt->fetchAll();
 	?>
         <th class="none"><?php echo OWNER; ?> <a href="toevoegen.php" style="text-align: right;"><?php echo ADD; ?></a><br />
 	<?php echo LENGTH; ?>: <?php echo $result[0]['sum(content_text.duration)']; ?>s
@@ -60,55 +66,61 @@
 // $maxdate = $now - 604800;
   $maxdate = $now - 172800;
 
-
   /* hackje even netjes maken en laten zien dat je datum en tijd beheerst*/
-  $db = sqlite_open(DATABASE, 0666, $sqlerror);
-  $search = 'content_run.end > '.$maxdate;
+  $search = 'content_run.end > :maxdate'
   
   if (isset($_POST['search'])) {
-    $needle = sqlite_escape_string(strtolower($_POST['search']));
-//    $search = '(lower(content_text.title) like \'%'.$needle.'%\' OR lower(content_text.content) like \'%'.$needle.'%\')';
-      $search = '(lower(content_text.title) like \'%'.$needle.'%\')';
+    $needle = '%'.strtolower($_POST['search']).'%';
+    $search = '(lower(content_text.title) like :needle OR lower(content_text.content) like :needle)';
   }
   if (isset($_SESSION['category'])) {
-	$select = 'SELECT content.id, content_run.start, content_run.end, sum(duration), content_text.title, content_text.photo FROM content_run, content, content_text, content_category, content_category_image WHERE '.$search.' AND content_category_image.categoryid = content_category.id AND content_category_image.id = content_text.category AND content_category.title = "'.$_SESSION['category'].'" AND content.id = content_run.contentid AND content.id = content_text.contentid GROUP BY content_run.id ORDER BY content_run.start DESC;';
+	$select = 'SELECT content.id, content_run.start, content_run.end, sum(duration), content_text.title, content_text.photo FROM content_run, content, content_text, content_category, content_category_image WHERE '.$search.' AND content_category_image.categoryid = content_category.id AND content_category_image.id = content_text.category AND content_category.title = :category AND content.id = content_run.contentid AND content.id = content_text.contentid GROUP BY content_run.id ORDER BY content_run.start DESC;';
   } else {
   	$select = 'SELECT content.id, content_run.start, content_run.end, sum(duration), content_text.title, content_text.photo FROM content_run, content, content_text WHERE '.$search.' AND content.id = content_run.contentid AND content.id = content_text.contentid GROUP BY content_run.id ORDER BY content_run.start DESC;';
   }
- 
- if (($query = sqlite_query($db, $select)) !== false ) {
-    $result = sqlite_fetch_all($query, SQLITE_ASSOC);
 
+  $stmt = $dbh->prepare($select);
+  $stmt->bindParam(':category', $category, PDO::PARAM_STR);
+  $stmt->bindParam(':maxdate', $maxdate, PDO::PARAM_INT);
+  $stmt->bindParam(':needle', $category, PDO::PARAM_STR);
+  $stmt->execute();
+
+  $result = $stmt->fetchAll();
+ 
     if (is_array($result)) {
       foreach ($result as $entry) {
+        $stmt = $dbh->prepare('SELECT givenname from content_editor, editors WHERE content_editor.contentid=:contentid AND content_editor.editorid = editors.id;');
+	$stmt->bindParam(':contentid', $entry['content.id'], PDO::PARAM_INT);
+	$stmt->execute();
+	$editors = $stmt->fetchAll();
+
     	$didedit = '';
-        //setlocale (LC_TIME, 'Dutch');
-	if (($query1 = sqlite_query($db, 'SELECT givenname from content_editor, editors WHERE content_editor.contentid='.$entry['content.id'].' AND content_editor.editorid = editors.id;')) !== false ) {
-	   $editors = sqlite_fetch_all($query1, SQLITE_ASSOC);
-	   if (count($editors) < 4) {
-	     foreach ($editors as $entry1) {
-	       $didedit .= $entry1['givenname'].', ';
-	     }
-	     $didedit = substr($didedit, 0, -2);
-	   } else {
-	     $entry1 = reset($editors);
-	     $didedit .= $entry1['givenname'].', ..., ';
-	     $entry1 = end($editors);
-	     $didedit .= $entry1['givenname'];
+	
+	if (count($editors) < 4) {
+	   foreach ($editors as $entry1) {
+	     $didedit .= $entry1['givenname'].', ';
 	   }
+	   $didedit = substr($didedit, 0, -2);
+	} else {
+	   $entry1 = reset($editors);
+	   $didedit .= $entry1['givenname'].', ..., ';
+	   $entry1 = end($editors);
+	   $didedit .= $entry1['givenname'];
 	}
 
 	$seen = 0;
-	
-	if (($query1 = sqlite_query($db, 'SELECT count(contentid) FROM content_seens, editors WHERE contentid='.$entry['content.id'].' AND content_seens.editorid = editors.id AND login=\''.sqlite_escape_string($_SERVER['REMOTE_USER']).'\'')) !== false ) {
-	   $seen = sqlite_fetch_all($query1, SQLITE_ASSOC);
-	   $seen = $seen[0]['count(contentid)'];
-	}
+
+	$stmt = $dbh->prepare('SELECT count(contentid) AS aantal FROM content_seens, editors WHERE contentid=:contentid AND content_seens.editorid = editors.id AND login=:login');
+	$stmt->bindParam(':contentid', $entry['content.id'], PDO::PARAM_INT);
+	$stmt->bindParam(':login', $_SERVER['REMOTE_USER'], PDO::PARAM_STR);
+	$stmt->execute();
+	$seen = $stmt->fetchAll();
+	$seen = $seen[0]['aantal'];
+
         echo '        <tr><td class="title"><a href="toevoegen.php?databaseid='.$entry['content.id'].'">'.($entry['content_text.title']==''?($entry['content_text.photo']==''?UNDEFINED:$entry['content_text.photo']):$entry['content_text.title']).'</a></td><td class="startdate">'.date('H:i:s<\b\r />j F',$entry['content_run.start']).'</td><td class="enddate">'.date('H:i:s<\b\r />j F',$entry['content_run.end']).'</td><td class="duration">'.$entry['sum(duration)'].'</td><td>'.$didedit.'</td><td>'.($seen>0?YES:NO).'</td></tr>'.chr(13).chr(10);
       }
     } else echo NORESULT;
-  } else echo NORESULT;
-  sqlite_close($db);
+   $dbh = null;
 ?>
        <tr><td class="title"><form method="post"><input type="text" name="search" /></form></td></tr>
     </table>

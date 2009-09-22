@@ -97,12 +97,7 @@
     return $result;
   }
 
-  function dbtoselect($name, $query, $active = '', $empty = false) { 
-    $db = sqlite_open(DATABASE,0666, $sqlerror);
-    $query = sqlite_query($db, $query);
-    $qresult = sqlite_fetch_all($query, SQLITE_ASSOC);
-    sqlite_close($db);
-
+  function dbtoselect($name, $qresult, $active = '', $empty = false) { 
     $result = '<select name="'.$name.'">';
 
     if ($empty===true) $result.='<option value=""></option>';
@@ -172,29 +167,28 @@
     $_SESSION['document']['activeid']=0;
   }
 
-  function checkandgenerate($id=0, $safebox=0, $width=269, $height=200, $format='png') {
+  function checkandgenerate($dbh, $id=0, $safebox=0, $width=269, $height=200, $format='png') {
     $title = passive('text_title', $id);
     $para = passive('text_content', $id);
     $photo = passive('text_photo', $id);
     $template = passive('text_template', $id);
     $category = passive('text_category', $id);
-    return checkandbroadcast($safebox, $width, $height, $format='png', $title, $para, $photo, $template, $category, $dir=PREVIEWDIR, $filename=md5($title.$para.$photo.$template.$category));
+    return checkandbroadcast($dbh, $safebox, $width, $height, $format='png', $title, $para, $photo, $template, $category, $dir=PREVIEWDIR, $filename=md5($title.$para.$photo.$template.$category));
   }
 
 
-  function checkandbroadcast($safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $para, $photo, $template, $category, $dir='', $filename='') {
+  function checkandbroadcast($dbh, $safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $para, $photo, $template, $category, $dir='', $filename='') {
     $filename = ($filename!=''?$filename:md5($title.$para.$photo.$template.$category));
     $dir = ($dir!=''?$dir:PREVIEWDIR);
     $pngfile = $dir.'/'.$filename.'.png';
     
     if (!file_exists($pngfile)) {
       $category = ($category!=''?$category:'0');
-      
-      $db = sqlite_open(DATABASE, 0666, $sqlerror);
-      $query = sqlite_query($db, 'SELECT content_category.title, content_category_image.title, content_category_image.photo, content_category_image.width, content_category_image.height, content_category_image.x, content_category_image.y FROM content_category, content_category_image WHERE content_category.id=content_category_image.categoryid AND content_category_image.id='.$category.';');
-      $qresult = sqlite_fetch_all($query, SQLITE_ASSOC);
-      sqlite_close($db);
-
+    
+      $stmt = $dbh->prepare('SELECT content_category.title, content_category_image.title, content_category_image.photo, content_category_image.width, content_category_image.height, content_category_image.x, content_category_image.y FROM content_category, content_category_image WHERE content_category.id=content_category_image.categoryid AND content_category_image.id=:content_category_image_id');
+      $stmt->bindParam(':content_category_image_id', $category, PDO::PARAM_INT);
+      $stmt->execute();
+      $qresult = $stmt->fetchAll();
 
       if (count($qresult)>=1) {
         if ($qresult[0]['content_category_image.title']=='') {
