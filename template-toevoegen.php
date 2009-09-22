@@ -43,8 +43,8 @@
     $dbh->beginTransaction();
     $stmt = $dbh->prepare('INSERT INTO content_category_image(categoryid, title, photo, width, height, x, y) VALUES (:categoryid, :title, :photo, :width, :height, :x, :y)';
     $stmt->bindParam(':categoryid', active('category', 'newtemplate'), PDO::PARAM_INT);
-    $stmt->bindParam(':title', active('title', 'newtemplate'), PDO::PARAM_STR);
-    $stmt->bindParam(':photo', active('photo', 'newtemplate'), PDO::PARAM_STR);
+    $stmt->bindParam(':title', active('title', 'newtemplate'), PDO::PARAM_STR, 20);
+    $stmt->bindParam(':photo', active('photo', 'newtemplate'), PDO::PARAM_STR, 100);
     $stmt->bindParam(':width', active('width', 'newtemplate'), PDO::PARAM_INT);
     $stmt->bindParam(':height', active('height', 'newtemplate'), PDO::PARAM_INT);
     $stmt->bindParam(':x', active('x', 'newtemplate'), PDO::PARAM_INT);

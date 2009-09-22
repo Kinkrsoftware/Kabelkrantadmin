@@ -96,11 +96,11 @@
 //	  .'\', \''.str_replace('\'', '\\\'', passive('text_content', $key)).'\')');
 
 	  $stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
-	  $stmt->bindParam(':text_template', passive('text_template', $key), PDO::PARAM_STR);
-	  $stmt->bindParam(':text_category', passive('text_category', $key), PDO::PARAM_STR);
+	  $stmt->bindParam(':text_template', passive('text_template', $key), PDO::PARAM_STR, 50);
+	  $stmt->bindParam(':text_category', passive('text_category', $key), PDO::PARAM_INT);
 	  $stmt->bindParam(':text_duration', passive('text_duration', $key), PDO::PARAM_INT);
-	  $stmt->bindParam(':text_photo', passive('text_photo', $key), PDO::PARAM_STR);
-	  $stmt->bindParam(':text_title', passive('text_title', $key), PDO::PARAM_STR);
+	  $stmt->bindParam(':text_photo', passive('text_photo', $key), PDO::PARAM_STR, 100);
+	  $stmt->bindParam(':text_title', passive('text_title', $key), PDO::PARAM_STR, 50);
 	  $stmt->bindParam(':text_content', passive('text_content', $key), PDO::PARAM_STR);
 	}
       }
@@ -128,7 +128,7 @@
       if (($result = $stmt->fetchAll()) === false || ($result !== false && $result[0]['editors.login'] != $_SERVER['REMOTE_USER'])) {
          $stmt = $dbh->prepare('INSERT INTO content_editor (contentid, editorid) VALUES (:databaseid, (SELECT id FROM editors WHERE login = :remoteuser))');
 	 $stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
-	 $stmt->bindParam(':databaseid', $_SERVER['REMOTE_USER'], PDO::PARAM_STR);
+	 $stmt->bindParam(':remoteuser', $_SERVER['REMOTE_USER'], PDO::PARAM_STR);
 	 $stmt->execute();
       }
     }
@@ -220,7 +220,7 @@ foreach ($_SESSION['document'] as $key => $value) {
 	  <?php echo dirtoselect('text_template', TEMPLATEDIR, active('text_template')); ?>
 	  <?php 
 		$stmt = $dbh->prepare('SELECT content_category_image.id, content_category.title, content_category_image.title FROM content_category, content_category_image WHERE content_category.id=content_category_image.categoryid'.(isset($_SESSION['category']) ? ' AND content_category.title = :category' : '').' ORDER BY content_category.title, content_category_image.title;'
-		$stmt->bindParam(':category', $_SESSION['category'], PDO::PARAM_STR);
+		$stmt->bindParam(':category', $_SESSION['category'], PDO::PARAM_STR, 20);
 		$stmt->execute();
 		$qresult = $stmt->fetchAll();
 	  	echo dbtoselect('text_category', $qresult, active('text_category')); ?> <a href="template-toevoegen.php"><?php echo NEWIMAGE; ?></a>

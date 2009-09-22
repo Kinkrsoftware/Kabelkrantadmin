@@ -20,15 +20,15 @@
 	$dbh->beginTransaction();
 
 	$stmt = $dbh->prepare('DELETE FROM editors WHERE login = :login');
-	$stmt->bindParam(':login', $login, PDO::PARAM_STR);
+	$stmt->bindParam(':login', $login, PDO::PARAM_STR, 15);
 	$stmt->execute();
 
 	$stmt = $dbh->prepare('INSERT INTO editors (login, passphrase, surname, addictions, givenname) VALUES (:login, :passphrase, :surname, :addictions, :givenname)');
-	$stmt->bindParam(':login', $login, PDO::PARAM_STR);
-	$stmt->bindParam(':passphrase', $passphrase, PDO::PARAM_STR);
-	$stmt->bindParam(':surname', $surname, PDO::PARAM_STR);
-	$stmt->bindParam(':addictions', $addictions, PDO::PARAM_STR);
-	$stmt->bindParam(':givenname', $givenname, PDO::PARAM_STR);
+	$stmt->bindParam(':login', $login, PDO::PARAM_STR, 15);
+	$stmt->bindParam(':passphrase', $passphrase, PDO::PARAM_STR, 32);
+	$stmt->bindParam(':surname', $surname, PDO::PARAM_STR, 50);
+	$stmt->bindParam(':addictions', $addictions, PDO::PARAM_STR, 10);
+	$stmt->bindParam(':givenname', $givenname, PDO::PARAM_STR, 50);
 	$dbh->commit();
 	$dbh = null;
 
@@ -48,7 +48,7 @@
 		$dbh->beginTransaction();
 
 		$stmt = $dbh->prepare('UPDATE editors SET passphrase = NULL WHERE login = :login');
-		$stmt->bindParam(':login', $login, PDO::PARAM_STR);
+		$stmt->bindParam(':login', $login, PDO::PARAM_STR, 15);
 		$stmt->execute();
 
 		$dbh->commit();
@@ -79,8 +79,8 @@
 		$dbh->beginTransaction();
 
 		$stmt = $dbh->prepare('UPDATE editors SET passphrase = :passphrase WHERE login = :login');
-		$stmt->bindParam(':login', $login, PDO::PARAM_STR);
-		$stmt->bindParam(':passphrase', $login, PDO::PARAM_STR);
+		$stmt->bindParam(':login', $login, PDO::PARAM_STR, 15);
+		$stmt->bindParam(':passphrase', $login, PDO::PARAM_STR, 32);
 		$stmt->execute();
 
 		$dbh->commit();

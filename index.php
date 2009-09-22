@@ -39,7 +39,7 @@
 
 		if (isset($_SESSION['category'])) {
 	                $stmt = $dbh->prepare('SELECT sum(content_text.duration) FROM content_run, content, content_text, content_category, content_category_image WHERE content_category_image.categoryid = content_category.id AND content_category_image.id = content_text.category AND content_category.title = :category AND content_run.start <= :start AND content_run.end >= :end AND content.id=content_run.contentid AND content.id=content_text.contentid;');
-	                $stmt->bindParam(':category', $category, PDO::PARAM_STR);
+	                $stmt->bindParam(':category', $category, PDO::PARAM_STR, 15);
 	                $stmt->bindParam(':start', $start, PDO::PARAM_INT);
 	                $stmt->bindParam(':end', $end, PDO::PARAM_INT);
 	                $stmt->execute();
@@ -80,7 +80,7 @@
   }
 
   $stmt = $dbh->prepare($select);
-  $stmt->bindParam(':category', $category, PDO::PARAM_STR);
+  $stmt->bindParam(':category', $category, PDO::PARAM_STR, 15);
   $stmt->bindParam(':maxdate', $maxdate, PDO::PARAM_INT);
   $stmt->bindParam(':needle', $category, PDO::PARAM_STR);
   $stmt->execute();
@@ -112,7 +112,7 @@
 
 	$stmt = $dbh->prepare('SELECT count(contentid) AS aantal FROM content_seens, editors WHERE contentid=:contentid AND content_seens.editorid = editors.id AND login=:login');
 	$stmt->bindParam(':contentid', $entry['content.id'], PDO::PARAM_INT);
-	$stmt->bindParam(':login', $_SERVER['REMOTE_USER'], PDO::PARAM_STR);
+	$stmt->bindParam(':login', $_SERVER['REMOTE_USER'], PDO::PARAM_STR, 15);
 	$stmt->execute();
 	$seen = $stmt->fetchAll();
 	$seen = $seen[0]['aantal'];
