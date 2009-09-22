@@ -100,7 +100,7 @@
 	  $stmt->bindParam(':text_category', passive('text_category', $key), PDO::PARAM_INT);
 	  $stmt->bindParam(':text_duration', passive('text_duration', $key), PDO::PARAM_INT);
 	  $stmt->bindParam(':text_photo', passive('text_photo', $key), PDO::PARAM_STR, 100);
-	  $stmt->bindParam(':text_title', passive('text_title', $key), PDO::PARAM_STR, 50);
+	  $stmt->bindParam(':text_title', passive('text_title', $key), PDO::PARAM_STR, 128);
 	  $stmt->bindParam(':text_content', passive('text_content', $key), PDO::PARAM_STR);
 	}
       }
