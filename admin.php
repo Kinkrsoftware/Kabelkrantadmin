@@ -29,6 +29,7 @@
 	$stmt->bindParam(':surname', $surname, PDO::PARAM_STR, 50);
 	$stmt->bindParam(':addictions', $addictions, PDO::PARAM_STR, 10);
 	$stmt->bindParam(':givenname', $givenname, PDO::PARAM_STR, 50);
+	$stmt->execute();
 	$dbh->commit();
 	$dbh = null;
 

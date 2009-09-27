@@ -5,6 +5,7 @@
   require_once('functions.php');
 
   $dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
+  $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
   if (isset($_GET['databaseid']) && is_numeric($_GET['databaseid']) && $_GET['databaseid'] > 0) {
     $stmt = $dbh->prepare('SELECT template, category, duration, photo, title, content FROM content, content_text WHERE content.id=:databaseid AND content.id = content_text.contentid;');
@@ -12,21 +13,25 @@
     $stmt->execute();
     $result = $stmt->fetchAll();
 
-    $query = $dbh->prepare('SELECT start, end, enabled FROM content_run WHERE contentid = :databaseid');
+    $stmt = $dbh->prepare('SELECT start, eind, enabled FROM content_run WHERE contentid = :databaseid');
     $stmt->bindParam(':databaseid', $_GET['databaseid'], PDO::PARAM_INT);
     $stmt->execute();
     $result1 = $stmt->fetchAll();
 
-    $query = $dbh->prepare('INSERT INTO content_seens (contentid, editorid) VALUES (:databaseid, (SELECT id FROM editors WHERE login=:remoteuser))');
+    $stmt = $dbh->prepare('INSERT INTO content_seens (contentid, editorid) VALUES (:databaseid, (SELECT id FROM editors WHERE login = :remoteuser))');
     $stmt->bindParam(':databaseid', $_GET['databaseid'], PDO::PARAM_INT);
     $stmt->bindParam(':remoteuser', $_SERVER['REMOTE_USER'], PDO::PARAM_STR);
-    $stmt->execute();
+    try {
+	    $stmt->execute();
+    }
+    catch (PDOException $e) {} 
+
     
     if (count($result) > 0) {
       newdocument();
       $_SESSION['document']['databaseid']=$_GET['databaseid'];
       $_SESSION['document']['content_start']=$result[0]['start'];
-      $_SESSION['document']['content_end']=$result[0]['end'];
+      $_SESSION['document']['content_end']=$result[0]['eind'];
       foreach ($result as $entry)
         $_SESSION['document'][]=array('text_template'=>$entry['template'],
 				      'text_category'=>$entry['category'],
@@ -39,7 +44,7 @@
       $_SESSION['document']['run']=array();
       foreach ($result1 as $entry) {
         $_SESSION['document']['run'][]=array('content_start'=>$entry['start'],
-					     'content_end'=>$entry['end'],
+					     'content_end'=>$entry['eind'],
 					     'content_enabled'=>$entry['enabled']);
       }
     }
@@ -70,25 +75,26 @@
     $result = array();
 
     if (isset($_SESSION['document']['databaseid'])) {
-	$query = $dbh->prepare('DELETE FROM content_text WHERE contentid = :databaseid');
-        $stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
+	$stmt = $dbh->prepare('DELETE FROM content_text WHERE contentid = :databaseid');
+	$stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
 	$stmt->execute();
     
 //      sqlite_query($db, 'DELETE FROM content WHERE id='.$_SESSION['document']['databaseid'].';'); /* even checken waarom dit nodig was */
 
-	$query = $dbh->prepare('UPDATE content SET state=1 WHERE id = %database');
+	$stmt = $dbh->prepare('UPDATE content SET state=1 WHERE id = :databaseid');
 	$stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
 	$stmt->execute();
     } else {
-        $dbh->query('INSERT INTO content (state) VALUES (0);');
-	$stmt = $dbh->query('SELECT max(id) FROM content WHERE state=0 ORDER BY id DESC;');
+        $dbh->query('INSERT INTO content (state) VALUES (0);'); /* Ooit van Auto-Increment gehoord? */
+	$stmt = $dbh->query('SELECT max(id) AS "max" FROM content WHERE state=0;');
 	$result = $stmt->fetchAll();
-        $_SESSION['document']['databaseid']=$result[0]['max(id)'];
+        $_SESSION['document']['databaseid']=$result[0]['max'];
     }
 
     if (!isset($_SESSION['document']['databaseid'])) {
       $dbh->rollBack();
     } else {
+      try {
       foreach ($_SESSION['document'] as $key => $value) {
         if (is_numeric($key) && $key > 0) {
 	  $stmt = $dbh->prepare('INSERT INTO content_text (contentid, template, category, duration, photo, title, content) VALUES (:databaseid, :text_template, :text_category, :text_duration, :text_photo, :text_title, :text_content)');
@@ -102,6 +108,7 @@
 	  $stmt->bindParam(':text_photo', passive('text_photo', $key), PDO::PARAM_STR, 100);
 	  $stmt->bindParam(':text_title', passive('text_title', $key), PDO::PARAM_STR, 128);
 	  $stmt->bindParam(':text_content', passive('text_content', $key), PDO::PARAM_STR);
+	  $stmt->execute();
 	}
       }
       $stmt = $dbh->prepare('DELETE FROM content_run WHERE contentid = :databaseid');
@@ -109,11 +116,12 @@
       $stmt->execute();
       
       foreach ($_SESSION['document']['run'] as $entry) {
-        $stmt = $dbh->prepare('INSERT INTO content_run (contentid, start, end, enabled) VALUES (:databaseid, :start, :end, :enabled)');
+        $stmt = $dbh->prepare('INSERT INTO content_run (contentid, start, eind, enabled) VALUES (:databaseid, :start, :end, :enabled)');
 	$stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
 	$stmt->bindParam(':start', $entry['content_start'], PDO::PARAM_INT);
 	$stmt->bindParam(':end', $entry['content_end'], PDO::PARAM_INT);
-	$stmt->bindParam(':enabled', ($entry['enabled']?1:0), PDO::PARAM_INT);
+	$enabled = ($entry['enabled']?1:0);
+	$stmt->bindParam(':enabled', $enabled, PDO::PARAM_INT);
 	$stmt->execute();
       }
       
@@ -131,9 +139,15 @@
 	 $stmt->bindParam(':remoteuser', $_SERVER['REMOTE_USER'], PDO::PARAM_STR);
 	 $stmt->execute();
       }
+
+      $dbh->commit();
+      } 
+      catch(PDOException $e)
+          {
+	      echo $e->getMessage();
+	          }
     }
    
-    $dbh->commit();
     $dbh = null;
     header('Location: '.$_SERVER['PHP_SELF'].'?databaseid='.$_SESSION['document']['databaseid']);
     exit;
@@ -192,7 +206,7 @@
 //preview
 foreach ($_SESSION['document'] as $key => $value) {
     if (is_numeric($key) && $key > 0) {
-      echo '      <input type="submit" class="image" name="action" value="'.$key.'" style="background-image: url(\'preview/'.@checkandgenerate($key, 1).'.png\'); width: 269px; height: 200px; font-size: 0;" />';
+      echo '      <input type="submit" class="image" name="action" value="'.$key.'" style="background-image: url(\'preview/'.@checkandgenerate($dbh, $key, 1).'.png\'); width: 269px; height: 200px; font-size: 0;" />';
     }
   }
 
@@ -219,10 +233,10 @@ foreach ($_SESSION['document'] as $key => $value) {
 	  <legend><?php echo TEMPLATE; ?></legend>
 	  <?php echo dirtoselect('text_template', TEMPLATEDIR, active('text_template')); ?>
 	  <?php 
-		$stmt = $dbh->prepare('SELECT content_category_image.id, content_category.title, content_category_image.title FROM content_category, content_category_image WHERE content_category.id=content_category_image.categoryid'.(isset($_SESSION['category']) ? ' AND content_category.title = :category' : '').' ORDER BY content_category.title, content_category_image.title;'
-		$stmt->bindParam(':category', $_SESSION['category'], PDO::PARAM_STR, 20);
+		$stmt = $dbh->prepare('SELECT content_category_image.id, content_category.title AS "category_title", content_category_image.title AS "title" FROM content_category, content_category_image WHERE content_category.id=content_category_image.categoryid'.(isset($_SESSION['category']) ? ' AND content_category.title = :category' : '').' ORDER BY content_category.title, content_category_image.title;');
+		if (isset($_SESSION['category']))  $stmt->bindParam(':category', $_SESSION['category'], PDO::PARAM_STR, 20);
 		$stmt->execute();
-		$qresult = $stmt->fetchAll();
+		$qresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
 	  	echo dbtoselect('text_category', $qresult, active('text_category')); ?> <a href="template-toevoegen.php"><?php echo NEWIMAGE; ?></a>
 	</fieldset>
 	<fieldset class="datetime"><legend><?php echo LENGTH; ?></legend><?php echo timetoinput('text_duration', active('text_duration')); ?></fieldset>
@@ -233,7 +247,7 @@ foreach ($_SESSION['document'] as $key => $value) {
 	</fieldset>
         <label><?php echo TITLE; ?></label><input type="text" name="text_title" value="<?php echo active('text_title'); ?>" /><br />
         <label><?php echo TEXT; ?></label><textarea name="text_content" rows="16" cols="70"><?php echo active('text_content'); ?></textarea>
-	<img src="preview/<?php echo @checkandgenerate($_SESSION['document']['activeid'], 1); ?>.png" alt="Preview" style="float: left; border: solid 1px #000; margin-left: 2px; margin-top: 1px;" onclick="if (this.width == '500') { this.width=269; this.height='200'; } else { this.width='500'; this.height='375'; }"/>
+	<img src="preview/<?php echo checkandgenerate($dbh, $_SESSION['document']['activeid'], 1); ?>.png" alt="Preview" style="float: left; border: solid 1px #000; margin-left: 2px; margin-top: 1px;" onclick="if (this.width == '500') { this.width=269; this.height='200'; } else { this.width='500'; this.height='375'; }"/>
       </fieldset>
     </form>
   </body>

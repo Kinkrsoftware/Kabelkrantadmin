@@ -95,7 +95,7 @@
         <?php 
 	  $stmt = $dbh->query('SELECT content_category.id, content_category.title FROM content_category ORDER BY content_category.title');
 	  $stmt->execute();
-	  $qresult = $stmt->fetchAll();
+	  $qresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
 	  echo dbtoselect('category', $qresult, active('category', 'newtemplate'), true);
 	?>
       </fieldset>

@@ -9,7 +9,8 @@
 		$start = $now;
 		$end = $now;
 		
-		$stmt = $dbh->prepare('SELECT sum(content_text.duration) AS totaal FROM content_run, content, content_text WHERE content_run.start <= :start AND content_run.end >= :end AND content.id=content_run.contentid AND content.id=content_text.contentid;');
+//		$stmt = $dbh->prepare('SELECT sum(content_text.duration) AS totaal FROM content_run, content, content_text WHERE content_run.start <= :start AND content_run.eind >= :eind AND content.id=content_run.contentid AND content.id=content_text.contentid;');
+		$stmt = $dbh->prepare('SELECT sum(content_text.duration) AS totaal FROM content_run, content_text WHERE content_run.start <= :start AND content_run.eind >= :end AND content_text.contentid = content_run.contentid;');
 		$stmt->bindParam(':start', $start, PDO::PARAM_INT);
 		$stmt->bindParam(':end', $end, PDO::PARAM_INT);
 		$stmt->execute();

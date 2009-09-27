@@ -185,22 +185,22 @@
     if (!file_exists($pngfile)) {
       $category = ($category!=''?$category:'0');
     
-      $stmt = $dbh->prepare('SELECT content_category.title, content_category_image.title, content_category_image.photo, content_category_image.width, content_category_image.height, content_category_image.x, content_category_image.y FROM content_category, content_category_image WHERE content_category.id=content_category_image.categoryid AND content_category_image.id=:content_category_image_id');
+      $stmt = $dbh->prepare('SELECT content_category.title AS "categorytitle", content_category_image.title AS "imagetitle", content_category_image.photo, content_category_image.width, content_category_image.height, content_category_image.x, content_category_image.y FROM content_category, content_category_image WHERE content_category.id=content_category_image.categoryid AND content_category_image.id=:content_category_image_id');
       $stmt->bindParam(':content_category_image_id', $category, PDO::PARAM_INT);
       $stmt->execute();
       $qresult = $stmt->fetchAll();
 
       if (count($qresult)>=1) {
-        if ($qresult[0]['content_category_image.title']=='') {
-	  $newfilename = checkandpreview($safebox, $width, $height, $format, $title, $para, $photo, TEMPLATEDIR.'/'.$template, $dir, $filename, $qresult[0]['content_category.title']);
+        if ($qresult[0]['imagetitle']=='') {
+	  $newfilename = checkandpreview($safebox, $width, $height, $format, $title, $para, $photo, TEMPLATEDIR.'/'.$template, $dir, $filename, $qresult[0]['categorytitle']);
         } else {
 	  $newfilename = checkandpreview($safebox, $width, $height, $format, $title, $para, $photo, TEMPLATEDIR.'/'.$template, $dir, $filename,
-	                                 $qresult[0]['content_category.title'],
-			                 $qresult[0]['content_category_image.photo'],
-    			                 $qresult[0]['content_category_image.width'],
-			                 $qresult[0]['content_category_image.height'],
-			                 $qresult[0]['content_category_image.x'],
-			                 $qresult[0]['content_category_image.y']);
+	                                 $qresult[0]['categorytitle'],
+			                 $qresult[0]['photo'],
+    			                 $qresult[0]['width'],
+			                 $qresult[0]['height'],
+			                 $qresult[0]['x'],
+			                 $qresult[0]['y']);
         }
       }
     }

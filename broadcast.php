@@ -24,38 +24,38 @@
   $adsoutro = array();
 	 
    
-   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.end >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Vandaag\' ORDER BY content_text.id, content.start, content.end ASC');
+   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Vandaag\' ORDER BY content_text.id, content.start, content.eind ASC');
    $stmt->bindParam(':start', $start, PDO::PARAM_INT);
    $stmt->bindParam(':end', $end, PDO::PARAM_INT);
    $stmt->execute();
-   $vandaagresult = $stmt->fetchAll();
+   $vandaagresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.end >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND (content_text.category=\'\' OR (content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id)) AND content_text.template <> \'ng-advertentie.xsl\' AND content_category.title <> \'Vandaag\' AND content_category.title <> \'Colofon\' GROUP BY content_text.id ORDER BY '.(THEMESEQ ? 'content_category_image.categoryid, ':'').'content_text.id, content.start, content.end ASC');
+   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND (content_text.category is NULL OR (content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id)) AND content_text.template <> \'ng-advertentie.xsl\' AND content_category.title <> \'Vandaag\' AND content_category.title <> \'Colofon\' ORDER BY content_text.id, '.(THEMESEQ ? 'content_category_image.categoryid, ':'').'content_text.id, content.start, content.eind ASC');
    $stmt->bindParam(':start', $start, PDO::PARAM_INT);
    $stmt->bindParam(':end', $end, PDO::PARAM_INT);
    $stmt->execute();
-   $contentresult = $stmt->fetchAll();
-  
-   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.end >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Colofon\' ORDER BY content_text.id, content.start, content.end ASC');
+   $contentresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Colofon\' ORDER BY content_text.id, content.start, content.eind ASC');
    $stmt->bindParam(':start', $start, PDO::PARAM_INT);
    $stmt->bindParam(':end', $end, PDO::PARAM_INT);
    $stmt->execute();
    $colofonresult = $stmt->fetchAll();
   
   if (!isset($_GET['no-ads'])) {
-    $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text WHERE content_run.start <= :start AND content_run.end >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_text.template = \'ng-advertentie.xsl\' ORDER BY content_text.id, content.start, content.end ASC');
+    $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text WHERE content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_text.template = \'ng-advertentie.xsl\' ORDER BY content_text.id, content.start, content.eind ASC');
     $stmt->bindParam(':start', $start, PDO::PARAM_INT);
     $stmt->bindParam(':end', $end, PDO::PARAM_INT);
     $stmt->execute();
-    $adsresult = $stmt->fetchAll();
+    $adsresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
   
     if (count($adsresult) > 0) {
     	
-  $adsintro = array(0 => array('content_text.id' => 22423, 'content_text.template' => 'ng-advertentie.xsl', 'content_text.category' => 216,
-  				 'content_text.title' => '', 'content_text.photo' => 'adverteren 01.jpg', 'content_text.content' => '', 'content_text.duration' => 3));
+  $adsintro = array(0 => array('id' => 22423, 'template' => 'ng-advertentie.xsl', 'category' => 216,
+  				 'title' => '', 'photo' => 'adverteren 01.jpg', 'content' => '', 'duration' => 3));
 
-  $adsoutro = array(0 => array('content_text.id' => 22423, 'content_text.template' => 'ng-advertentie.xsl', 'content_text.category' => 216,
-  				 'content_text.title' => '', 'content_text.photo' => 'adverteren 02.jpg', 'content_text.content' => '', 'content_text.duration' => 3));
+  $adsoutro = array(0 => array('id' => 22423, 'template' => 'ng-advertentie.xsl', 'category' => 216,
+  				 'title' => '', 'photo' => 'adverteren 02.jpg', 'content' => '', 'duration' => 3));
     }
 
   }
@@ -74,14 +74,14 @@
 
   $out = array();
   foreach ($result as $entry) {
-    $template = stripslashes($entry['content_text.template']);
-    $category = stripslashes($entry['content_text.category']);
-    $category_title = stripslashes($entry['content_category.title']);
-    $title = stripslashes($entry['content_text.title']);
-    $content = stripslashes($entry['content_text.content']);
-    $photo = stripslashes($entry['content_text.photo']);
-    $dur = $entry['content_text.duration'];
-    $id = $entry['content_text.id'];
+    $template = stripslashes($entry['template']);
+    $category = stripslashes($entry['category']);
+//  $category_title = stripslashes($entry['title']);
+    $title = stripslashes($entry['title']);
+    $content = stripslashes($entry['content']);
+    $photo = stripslashes($entry['photo']);
+    $dur = $entry['duration'];
+    $id = $entry['id'];
 
     $file = md5($title.$content.$photo.$template.$category);
     $location = BROADCASTCACHEDIR.'/'.$file.'.png';
@@ -90,7 +90,7 @@
 	    $file = checkandbroadcast($dbh, $safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $content, $photo, $template, $category, $dir=$tmpdirectory);
     }
 
-    $out[] = array('title'=>($title==''?($photo==''?'Naamloos':$photo):$title), 'src'=>REMOTEDIR.'/cache/'.$file.'.png', 'dur'=>$dur, 'template'=>$template, 'category'=>$category_title);
+    $out[] = array('title'=>($title==''?($photo==''?'Naamloos':$photo):$title), 'src'=>REMOTEDIR.'/cache/'.$file.'.png', 'dur'=>$dur, 'template'=>$template, 'category'=>$category);
   }
   $dbh = null; /* Database niet meer nodig */
 

@@ -1,13 +1,15 @@
 <?php
   define ('OWNER', 'PlusRTV');
-  define ('ABSOLUTEDIR', '/opt/cherokee/var/www');
+  define ('ABSOLUTEDIR', '/opt/cherokee/var/www2');
   define ('TEMPLATEDIR', ABSOLUTEDIR.'/xsl');
   define ('PREVIEWDIR', ABSOLUTEDIR.'/preview');
   define ('USER_IMAGEDIR', ABSOLUTEDIR.'/fotos');
   define ('BROADCASTDIR', ABSOLUTEDIR.'/broadcast');
   define ('BROADCASTCACHEDIR', ABSOLUTEDIR.'/broadcast/cache');
   define ('CACHEDIR', ABSOLUTEDIR.'/broadcast/cache');
-  define ('DATABASE', ABSOLUTEDIR.'/database/'.strtolower(OWNER).'-olifant.db');
+  define ('DATABASE', 'pgsql:host=localhost;dbname=kka');
+  define ('DB_USER', 'kka');
+  define ('DB_PASSWORD', 'inloggen');
   define ('THEMESEQ', TRUE);
   define ('BUMPDURATION', 10);
   define ('DURATION', 23);
