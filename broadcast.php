@@ -183,7 +183,7 @@
     exec('mkdir '.$tmpdirectory);
   }
 
-  exec('/usr/bin/mogrify -resize '.WEBRESOLUTIONW.'x'.WEBRESOLUTIONH.' -format jpg '.$tmpdirectory.'/*.png');
+//  exec('/usr/bin/mogrify -resize '.WEBRESOLUTIONW.'x'.WEBRESOLUTIONH.' -format jpg '.$tmpdirectory.'/*.png');
   exec('mv -u '.$tmpdirectory.'/*.smil '.BROADCASTDIR.'/.');
   exec('mv -u '.$tmpdirectory.'/*.html '.BROADCASTDIR.'/.');
   exec('mv -u '.$tmpdirectory.'/*.jpg '.BROADCASTCACHEDIR.'/.');
