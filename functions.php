@@ -230,7 +230,7 @@
     $file = $dir.'/'.$filename.'.png';
 
     if (!file_exists($file)) {
-          $category_xml = '<category><title>'.strtoupper($cat_title).'</title><img><src>'.($cat_photo!=''?USER_IMAGEDIR.'/'.$cat_photo:'').'</src>'.
+          $category_xml = '<category><title>'.$cat_title.'</title><img><src>'.($cat_photo!=''?USER_IMAGEDIR.'/'.$cat_photo:'').'</src>'.
                           '<width>'.$cat_width.'</width>'.
                           '<height>'.$cat_height.'</height>'.
                           '<x>'.$cat_x.'</x>'.
@@ -245,7 +245,7 @@
       $xml->loadXML('<article>'.
                     $category_xml.
                     '<safebox>'.$safebox.'</safebox>'.
-                    '<title>'.strtoupper($title).'</title>'.
+                    '<title>'.$title.'</title>'.
                     '<para>'.$para.'</para>'.
                     $photo_xml.
                     '</article>');
