@@ -16,6 +16,8 @@
   }
   $end = $now;
 
+  $curday = date('N');
+
   $vandaagresult = array();
   $contentresult = array();
   $colofonresult = array();
@@ -24,26 +26,30 @@
   $adsoutro = array();
 	 
    
-   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Vandaag\' ORDER BY content_text.id, content.start, content.eind ASC');
+   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.enabled = 1 AND (content_run.day = 0 or content_run.day = :curday) AND content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Vandaag\' ORDER BY content_text.id, content.start, content.eind ASC');
+   $stmt->bindParam(':curday', $curday, PDO::PARAM_INT);
    $stmt->bindParam(':start', $start, PDO::PARAM_INT);
    $stmt->bindParam(':end', $end, PDO::PARAM_INT);
    $stmt->execute();
    $vandaagresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND (content_text.category is NULL OR (content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id)) AND content_text.template <> \'ng-advertentie.xsl\' AND content_category.title <> \'Vandaag\' AND content_category.title <> \'Colofon\' ORDER BY content_text.id, '.(THEMESEQ ? 'content_category_image.categoryid, ':'').'content_text.id, content.start, content.eind ASC');
+   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.enabled = 1 AND (content_run.day = 0 or content_run.day = :curday) AND content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND (content_text.category is NULL OR (content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id)) AND content_text.template <> \'ng-advertentie.xsl\' AND content_category.title <> \'Vandaag\' AND content_category.title <> \'Colofon\' ORDER BY content_text.id, '.(THEMESEQ ? 'content_category_image.categoryid, ':'').'content_text.id, content.start, content.eind ASC');
+   $stmt->bindParam(':curday', $curday, PDO::PARAM_INT);
    $stmt->bindParam(':start', $start, PDO::PARAM_INT);
    $stmt->bindParam(':end', $end, PDO::PARAM_INT);
    $stmt->execute();
    $contentresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Colofon\' ORDER BY content_text.id, content.start, content.eind ASC');
+   $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_category.title, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text, content_category, content_category_image WHERE content_run.enabled = 1 AND (content_run.day = 0 or content_run.day = :curday) AND content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_category.id=content_category_image.categoryid AND content_text.category=content_category_image.id AND content_category.title = \'Colofon\' ORDER BY content_text.id, content.start, content.eind ASC');
+   $stmt->bindParam(':curday', $curday, PDO::PARAM_INT);
    $stmt->bindParam(':start', $start, PDO::PARAM_INT);
    $stmt->bindParam(':end', $end, PDO::PARAM_INT);
    $stmt->execute();
    $colofonresult = $stmt->fetchAll();
   
   if (!isset($_GET['no-ads'])) {
-    $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text WHERE content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_text.template = \'ng-advertentie.xsl\' ORDER BY content_text.id, content.start, content.eind ASC');
+    $stmt = $dbh->prepare('SELECT content_text.id, content_text.template, content_text.category, content_text.title, content_text.photo, content_text.content, content_text.duration  FROM content_run, content, content_text WHERE content_run.enabled = 1 AND (content_run.day = 0 or content_run.day = :curday) AND content_run.start <= :start AND content_run.eind >= :end AND content.id = content_run.contentid AND content.id=content_text.contentid AND content_text.template = \'ng-advertentie.xsl\' ORDER BY content_text.id, content.start, content.eind ASC');
+    $stmt->bindParam(':curday', $curday, PDO::PARAM_INT);
     $stmt->bindParam(':start', $start, PDO::PARAM_INT);
     $stmt->bindParam(':end', $end, PDO::PARAM_INT);
     $stmt->execute();
@@ -73,6 +79,7 @@
   }
 
   $out = array();
+  $batch = array();
   foreach ($result as $entry) {
     $template = stripslashes($entry['template']);
     $category = stripslashes($entry['category']);
@@ -87,11 +94,14 @@
     $location = BROADCASTCACHEDIR.'/'.$file.'.png';
 
     if (!file_exists($location)) {
-	    $file = checkandbroadcast($dbh, $safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $content, $photo, $template, $category, $dir=$tmpdirectory);
+	    $file = checkandbroadcast($dbh, $safebox=0, $width=RESOLUTIONW, $height=RESOLUTIONH, $format='png', $title, $content, $photo, $template, $category, $tmpdirectory, '', true);
+	    $batch[] = $file;
     }
 
     $out[] = array('title'=>($title==''?($photo==''?'Naamloos':$photo):$title), 'src'=>REMOTEDIR.'/cache/'.$file.'.png', 'dur'=>$dur, 'template'=>$template, 'category'=>$category);
   }
+
+  batchrender($tmpdirectory, RESOLUTIONW, RESOLUTIONH, $batch);
   $dbh = null; /* Database niet meer nodig */
 
   reset($out);

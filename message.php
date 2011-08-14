@@ -37,6 +37,7 @@ define('UPLOAD', 'Upload');
 define('ERROR_IN_TEMPLATE', 'XML-fout in document');
 
 define('NEWTEMP', 'Nieuwe Template');
+define('NEWCATEGORY', 'Nieuwe Categorie');
 define('CATEGORY', 'Categorie');
 define('PARAM', 'Parameters');
 define('LEFT', 'Links');

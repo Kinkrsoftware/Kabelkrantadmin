@@ -3,7 +3,7 @@
 
   $error = '';
   if (isset($_POST['action'])) {
-  if ($_POST['action']=='Toevoegen') {
+  if ($_POST['action']==ACT_ADD) {
     $title = trim($_POST['newtitle']);
     
     if ($title != '')  {
@@ -36,7 +36,7 @@
         <fieldset>
 	   <legend>Categorie Toevoegen</legend>
 	   <label for="newtitle" style="display: block; width: 110px; float: left; clear: both;">Titel:</label> <input id="newtitle" name="newtitle" type="text" /> 
-	   <input name="action" type="submit" value="Toevoegen" class="button" style="clear: both; width: auto;" />
+	   <input name="action" type="submit" value="<?php echo ACT_ADD;?>" class="button" style="clear: both; width: auto;" />
         </fieldset>
      </form>
      <form method="post">

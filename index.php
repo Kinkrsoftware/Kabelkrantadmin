@@ -34,21 +34,25 @@
 		$now = time();
 		$start = $now;
 		$end = $now;
+
+		$curday = date('N');
                 
 		$dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
 
 		if (isset($_SESSION['category'])) {
-			$stmt = $dbh->prepare('select sum(duration) as "duration" from content_run, content_text where content_text.contentid = content_run.contentid AND content_run.start <= :start AND content_run.eind >= :end AND content_text.category IN (select content_category_image.id from content_category_image, content_category where content_category_image.categoryid = content_category.id AND content_category.title = :category)');
+			$stmt = $dbh->prepare('select sum(duration) as "duration" from content_run, content_text where content_text.contentid = content_run.contentid AND content_run.enabled = 1 AND (content_run.day = 0 or content_run.day = :curday) AND content_run.start <= :start AND content_run.eind >= :end AND content_text.category IN (select content_category_image.id from content_category_image, content_category where content_category_image.categoryid = content_category.id AND content_category.title = :category)');
 
 //:	                $stmt = $dbh->prepare('SELECT sum(content_text.duration) AS "duration" FROM content_run, content, content_text, content_category, content_category_image WHERE content_category_image.categoryid = content_category.id AND content_category_image.id = content_text.category AND content_category.title = :category AND content_run.start <= :start AND content_run.eind >= :end AND content.id=content_run.contentid AND content.id=content_text.contentid;');
 	                $stmt->bindParam(':category', $_SESSION['category'], PDO::PARAM_STR, 15);
 	                $stmt->bindParam(':start', $start, PDO::PARAM_INT);
 	                $stmt->bindParam(':end', $end, PDO::PARAM_INT);
+	                $stmt->bindParam(':curday', $curday, PDO::PARAM_INT);
 	                $stmt->execute();
 		} else {
-	                $stmt = $dbh->prepare('SELECT sum(content_text.duration) AS "duration" FROM content_run, content_text WHERE content_run.start <= :start AND content_run.eind >= :end AND content_run.contentid = content_text.contentid;');
+	                $stmt = $dbh->prepare('SELECT sum(content_text.duration) AS "duration" FROM content_run, content_text WHERE content_run.enabled = 1 AND (content_run.day = 0 or content_run.day = :curday) AND content_run.start <= :start AND content_run.eind >= :end AND content_run.contentid = content_text.contentid;');
 	                $stmt->bindParam(':start', $start, PDO::PARAM_INT);
 	                $stmt->bindParam(':end', $end, PDO::PARAM_INT);
+	                $stmt->bindParam(':curday', $curday, PDO::PARAM_INT);
 	                $stmt->execute();
 		}
 

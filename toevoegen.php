@@ -13,7 +13,7 @@
     $stmt->execute();
     $result = $stmt->fetchAll();
 
-    $stmt = $dbh->prepare('SELECT start, eind, enabled FROM content_run WHERE contentid = :databaseid');
+    $stmt = $dbh->prepare('SELECT start, eind, enabled, day FROM content_run WHERE contentid = :databaseid');
     $stmt->bindParam(':databaseid', $_GET['databaseid'], PDO::PARAM_INT);
     $stmt->execute();
     $result1 = $stmt->fetchAll();
@@ -45,7 +45,8 @@
       foreach ($result1 as $entry) {
         $_SESSION['document']['run'][]=array('content_start'=>$entry['start'],
 					     'content_end'=>$entry['eind'],
-					     'content_enabled'=>$entry['enabled']);
+                                             'day'=>$entry['day'],
+					     'enabled'=>$entry['enabled']);
       }
     }
     
@@ -69,7 +70,7 @@
   post2sessionactive('text_category');
   post2sessionactive('text_photo');
 
-  if ($_POST['action']==ACT_SAVE) {
+  if (isset($_POST['action']) && $_POST['action']==ACT_SAVE) {
     $dbh->beginTransaction();
 
     $result = array();
@@ -116,12 +117,13 @@
       $stmt->execute();
       
       foreach ($_SESSION['document']['run'] as $entry) {
-        $stmt = $dbh->prepare('INSERT INTO content_run (contentid, start, eind, enabled) VALUES (:databaseid, :start, :end, :enabled)');
+        $stmt = $dbh->prepare('INSERT INTO content_run (contentid, start, eind, enabled, day) VALUES (:databaseid, :start, :end, :enabled, :day)');
 	$stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
 	$stmt->bindParam(':start', $entry['content_start'], PDO::PARAM_INT);
 	$stmt->bindParam(':end', $entry['content_end'], PDO::PARAM_INT);
 	$enabled = ($entry['enabled']?1:0);
 	$stmt->bindParam(':enabled', $enabled, PDO::PARAM_INT);
+	$stmt->bindParam(':day', $entry['day'], PDO::PARAM_INT);
 	$stmt->execute();
       }
       
@@ -206,7 +208,7 @@
 //preview
 foreach ($_SESSION['document'] as $key => $value) {
     if (is_numeric($key) && $key > 0) {
-      echo '      <input type="submit" class="image" name="action" value="'.$key.'" style="background-image: url(\'preview/'.@checkandgenerate($dbh, $key, 1).'.png\'); width: 269px; height: 200px; font-size: 0;" />';
+      echo '      <input type="submit" class="image" name="action" value="'.$key.'" style="background-image: url(\'preview/'.@checkandgenerate($dbh, $key, 1).'.png\'); width: '.PREVIEWRESOLUTIONW.'px; height: '.PREVIEWRESOLUTIONH.'px; font-size: 0;" />';
     }
   }
 
@@ -247,7 +249,7 @@ foreach ($_SESSION['document'] as $key => $value) {
 	</fieldset>
         <label><?php echo TITLE; ?></label><input type="text" name="text_title" value="<?php echo active('text_title'); ?>" /><br />
         <label><?php echo TEXT; ?></label><textarea name="text_content" rows="16" cols="70"><?php echo active('text_content'); ?></textarea>
-	<img src="preview/<?php echo checkandgenerate($dbh, $_SESSION['document']['activeid'], 1); ?>.png" alt="Preview" style="float: left; border: solid 1px #000; margin-left: 2px; margin-top: 1px;" onclick="if (this.width == '500') { this.width=269; this.height='200'; } else { this.width='500'; this.height='375'; }"/>
+	<img src="preview/<?php echo checkandgenerate($dbh, $_SESSION['document']['activeid'], 1); ?>.png" alt="Preview" style="float: left; border: solid 1px #000; margin-left: 2px; margin-top: 2px;" onclick="if (this.width == <?php echo WEBRESOLUTIONW;?>) { this.width=<?php echo PREVIEWRESOLUTIONW;?>; this.height=<?php echo PREVIEWRESOLUTIONH;?>; } else { this.width=<?php echo WEBRESOLUTIONW;?>; this.height=<?php echo WEBRESOLUTIONH;?>; }"/>
       </fieldset>
     </form>
   </body>

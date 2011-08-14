@@ -9,10 +9,10 @@
 		$start = $now;
 		$end = $now;
 		
-//		$stmt = $dbh->prepare('SELECT sum(content_text.duration) AS totaal FROM content_run, content, content_text WHERE content_run.start <= :start AND content_run.eind >= :eind AND content.id=content_run.contentid AND content.id=content_text.contentid;');
-		$stmt = $dbh->prepare('SELECT sum(content_text.duration) AS totaal FROM content_run, content_text WHERE content_run.start <= :start AND content_run.eind >= :end AND content_text.contentid = content_run.contentid;');
+		$stmt = $dbh->prepare('SELECT sum(content_text.duration) AS totaal FROM content_run, content_text WHERE content_run.enabled = 1 AND (content_run.day = 0 or content_run.day = :curday) AND content_run.start <= :start AND content_run.eind >= :end AND content_text.contentid = content_run.contentid;');
 		$stmt->bindParam(':start', $start, PDO::PARAM_INT);
 		$stmt->bindParam(':end', $end, PDO::PARAM_INT);
+		$stmt->bindParam(':curday', date('N', $now), PDO::PARAM_INT);
 		$stmt->execute();
 		$result = $stmt->fetchAll();
 
@@ -40,7 +40,7 @@
 
 	for ($i=2; $i<4; $i++) {
 		imageline($im, (70*2*$i), 0, (70*2*$i), 200, $blue);
-		imagestring($im, 4, (70*2*$i)+4, 183, date("n-j", $now+(604800 *($i-1))), $blue);
+		imagestring($im, 4, (70*2*$i)+4, 183, date("j-n", $now+(604800 *($i-1))), $blue);
 	}
 
 	for($i=0; $i<60; $i++) {

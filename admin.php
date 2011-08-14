@@ -1,11 +1,8 @@
 <?php
   require_once('functions.php');
-  $now = time();
 
-  if (isset($_GET['now']) && is_numeric($_GET['now'])) {
-     $now = $_GET['now'];
-  }
-
+  $error = '';
+  if (isset($_POST['action'])) {
   if ($_POST['action']=='Maak Gebruiker') {
     $login = trim($_POST['newuser']);
     $surname = trim($_POST['surname']);
@@ -34,9 +31,13 @@
 	$dbh = null;
 
 	$fp = fopen('.htdigest', 'a');
-	fwrite($fp, $login.':Kabelkrantadmin:'.$passphrase."\n");
-	fflush($fp);
-	fclose($fp);
+	if ($fp) {
+		fwrite($fp, $login.':Kabelkrantadmin:'.$passphrase."\n");
+		fflush($fp);
+		fclose($fp);
+	} else {
+		$error = 'Fout: Met aan zekerheidgrenzende waarschijnlijkheid is .htdigest niet toegankelijk om te schrijven door PHP.';
+	}
 //	header('Location: '.$_SERVER['PHP_SELF']);
     }
   } else if ($_POST['action']=='Verwijder Gebruiker') {
@@ -103,6 +104,7 @@
 	
 	}
   }
+}
 
   
 ?>
@@ -114,6 +116,7 @@
     <link rel="stylesheet" href="toevoegen.css" type="text/css" />
   </head>
   <body>
+    <?php echo $error; ?>
     Welkom op de nieuwe beta-versie van kabelkrantadmin.<br />
     Momenteel worden wat toevoegingen gedaan aan de broncode, het kan zijn
     dat je daar iets van merkt.<br />
@@ -176,7 +179,6 @@
 	</fieldset>
      </form>
 
-     <i>Wanneer er serieuze problemen zijn, kan er altijd gebeld worden met +31 85 7 85 31 85. Kinkrsoftware/Stefan de Konink;<br />
-	Jeroen heeft ook een noodnummer.</i>
+     <i>Wanneer er serieuze problemen zijn, kan er altijd gebeld worden met +31 85 7 85 31 85. Kinkrsoftware/Stefan de Konink;</i>
 </body>
 </html>

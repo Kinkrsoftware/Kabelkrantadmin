@@ -13,7 +13,7 @@
   post2sessionactive('title', 'newtemplate');
   post2sessionactive('category', 'newtemplate');
 
-  if ($_POST['action']==ACT_NEW) {
+  if (isset($_POST['action']) && $_POST['action']==ACT_NEW) {
     unset($_SESSION['newtemplate'][0]);
   }
 
@@ -32,23 +32,29 @@
     $qresult = $stmt->fetchAll();
   }
 
+  if (isset($qresult[0])) {
+
   $preview = checkandpreview($safebox=1, $width=269, $height=200, $format='png', 
   			       active('title', 'newtemplate'), 'Laten we het eens zonder tekst doen.', '',
 			       'default.xsl', $dir='', $filename=md5('default.xsl'.$qresult[0]['title'].active('title', 'newtemplate').active('photo', 'newtemplate').active('w', 'newtemplate').active('h', 'newtemplate').active('x', 'newtemplate').active('y', 'newtemplate')),
 			       $qresult[0]['title'],
 			       active('photo', 'newtemplate'), active('w', 'newtemplate'),
 			       active('h', 'newtemplate'), active('x', 'newtemplate'), active('y', 'newtemplate'));
+}
 
+
+   if (isset($_POST['action'])) {
    if ($_POST['action']==ACT_SAVE && active('title', 'newtemplate')!='' && active('photo', 'newtemplate')!='' && active('category', 'newtemplate')!='') {
     $dbh->beginTransaction();
-    $stmt = $dbh->prepare('INSERT INTO content_category_image(categoryid, title, photo, width, height, x, y) VALUES (:categoryid, :title, :photo, :width, :height, :x, :y');
+    $stmt = $dbh->prepare('INSERT INTO content_category_image(categoryid, title, photo, width, height, x, y) VALUES (:categoryid, :title, :photo, :width, :height, :x, :y)');
     $stmt->bindParam(':categoryid', active('category', 'newtemplate'), PDO::PARAM_INT);
     $stmt->bindParam(':title', active('title', 'newtemplate'), PDO::PARAM_STR, 20);
     $stmt->bindParam(':photo', active('photo', 'newtemplate'), PDO::PARAM_STR, 100);
-    $stmt->bindParam(':width', active('width', 'newtemplate'), PDO::PARAM_INT);
-    $stmt->bindParam(':height', active('height', 'newtemplate'), PDO::PARAM_INT);
+    $stmt->bindParam(':width', active('w', 'newtemplate'), PDO::PARAM_INT);
+    $stmt->bindParam(':height', active('h', 'newtemplate'), PDO::PARAM_INT);
     $stmt->bindParam(':x', active('x', 'newtemplate'), PDO::PARAM_INT);
     $stmt->bindParam(':y', active('y', 'newtemplate'), PDO::PARAM_INT);
+    $stmt->execute();
     $dbh->commit();
     $dbh = null;
     header('Location: toevoegen.php');
@@ -59,6 +65,7 @@
     $dbh = null;
     header('Location: toevoegen.php');
     exit;
+  }
   }
 
   if (isset($_GET['debug'])) {
@@ -97,7 +104,8 @@
 	  $stmt->execute();
 	  $qresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
 	  echo dbtoselect('category', $qresult, active('category', 'newtemplate'), true);
-	?>
+        ?>
+        <a href="categorie-toevoegen.php"><?php echo NEWCATEGORY; ?></a>
       </fieldset>
       <fieldset>
         <legend><?php echo TITLE; ?></legend>

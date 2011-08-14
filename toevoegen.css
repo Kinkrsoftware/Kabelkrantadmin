@@ -41,6 +41,7 @@
       input.image {
         width: auto;
         margin-right: 1px;
+        background-repeat: no-repeat;
       }
 
       td.startdate {
