@@ -77,7 +77,7 @@
     paste2sessionpassive($var, $_SESSION[$part]['activeid'], $part, $value); 
   }
  
-  function dirtoselect($name, $dir, $active = '', $empty = false, $maxdate = 0) {
+  function dirtoselect($name, $dir, $active = '', $empty = false, $maxdate = 0, $extension = '') {
     $templates = array();
     if ($empty===true) $templates[] = '';
     if (is_dir($dir)) {
@@ -85,7 +85,9 @@
         while (($file = readdir($dh)) !== false) {
           if (!is_dir($dir.'/'.$file)) {
 	    if ($maxdate == 0 || (filectime($dir.'/'.$file) > $maxdate)) {
-              $templates[]=$file;
+              if ($extension == '' || (substr( $file, strlen( $file ) - strlen( $extension ) ) === $extension)) {
+                $templates[]=$file;
+              }
 	    }
           }
         }

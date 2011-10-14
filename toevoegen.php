@@ -233,7 +233,7 @@ foreach ($_SESSION['document'] as $key => $value) {
         <legend><?php echo TEXTPAGE; ?></legend>
 	<fieldset>
 	  <legend><?php echo TEMPLATE; ?></legend>
-	  <?php echo dirtoselect('text_template', TEMPLATEDIR, active('text_template')); ?>
+	  <?php echo dirtoselect('text_template', TEMPLATEDIR, active('text_template'), 0, '.xsl'); ?>
 	  <?php 
 		$stmt = $dbh->prepare('SELECT content_category_image.id, content_category.title AS "category_title", content_category_image.title AS "title" FROM content_category, content_category_image WHERE content_category.id=content_category_image.categoryid'.(isset($_SESSION['category']) ? ' AND content_category.title = :category' : '').' ORDER BY content_category.title, content_category_image.title;');
 		if (isset($_SESSION['category']))  $stmt->bindParam(':category', $_SESSION['category'], PDO::PARAM_STR, 20);
