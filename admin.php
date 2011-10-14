@@ -11,7 +11,7 @@
     $password = trim($_POST['password']);
 
     if ($login != '' && $givenname != '')  {
-	$passphrase = md5($login.':Kabelkrantadmin:'.$password);
+	$passphrase = md5($login.':kabelkrantadmin:'.$password);
 
     	$dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
 	$dbh->beginTransaction();
@@ -32,7 +32,7 @@
 
 	$fp = fopen('.htdigest', 'a');
 	if ($fp) {
-		fwrite($fp, $login.':Kabelkrantadmin:'.$passphrase."\n");
+		fwrite($fp, $login.':kabelkrantadmin:'.$passphrase."\n");
 		fflush($fp);
 		fclose($fp);
 	} else {
@@ -74,7 +74,7 @@
 	$password = trim($_POST['newpassword']);
 
 	if ($login != '' && $password != '') {
-		$passphrase = md5($login.':Kabelkrantadmin:'.$password);
+		$passphrase = md5($login.':kabelkrantadmin:'.$password);
 		clearstatcache();
 		/* we halen de gebruiker niet uit de database, omdat de refentiele integriteit dat kwijt raakt */
 	    	$dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
@@ -99,7 +99,7 @@
 		  }
 		}
 		fclose($fp);
-		$contents.=$login.':Kabelkrantadmin:'.$passphrase."\n";
+		$contents.=$login.':kabelkrantadmin:'.$passphrase."\n";
 		file_put_contents('.htdigest', $contents, LOCK_EX);
 	
 	}
