@@ -8,7 +8,7 @@
   $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
   if (isset($_GET['databaseid']) && is_numeric($_GET['databaseid']) && $_GET['databaseid'] > 0) {
-    $stmt = $dbh->prepare('SELECT template, category, duration, photo, title, content FROM content, content_text WHERE content.id=:databaseid AND content.id = content_text.contentid;');
+    $stmt = $dbh->prepare('SELECT template, category, duration, photo, title, content FROM content, content_text WHERE content.id=:databaseid AND content.id = content_text.contentid ORDER BY content_text.id;');
     $stmt->bindParam(':databaseid', $_GET['databaseid'], PDO::PARAM_INT);
     $stmt->execute();
     $result = $stmt->fetchAll();

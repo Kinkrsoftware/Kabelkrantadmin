@@ -26,7 +26,7 @@
   </head>
   <body>
     <?php if (EMERGENCY) echo EMERG.'<br /><br />'; ?>
-    <?php echo WELCOME; ?><br />
+    <?php echo WELCOME.' '.VERSION.' - <i>'.SIGNEDINUSER.'</i>: <b>'.$_SERVER['PHP_AUTH_USER'].'</b>'; ?><br />
 
     <table>
       <tr>
@@ -73,7 +73,7 @@
   $maxdate = $now - 172800;
 
   /* hackje even netjes maken en laten zien dat je datum en tijd beheerst*/
-  $search = 'content_run.eind > :maxdate';
+  $search = 'content_run.eind > :maxdate AND content_run.enabled = 1';
   
   if (isset($_POST['search'])) {
     $needle = '%'.strtolower($_POST['search']).'%';

@@ -198,7 +198,7 @@
   exec('mv -u '.$tmpdirectory.'/*.html '.BROADCASTDIR.'/.');
   exec('mv -u '.$tmpdirectory.'/*.jpg '.BROADCASTCACHEDIR.'/.');
   exec('mv -u '.$tmpdirectory.'/*.png '.BROADCASTCACHEDIR.'/.');
-  exec('ln -sf /home/tv/broadcast/'.date('Y-m-d', $now).'.smil /home/tv/broadcast.smil');
+  exec('ln -sf /home/tv/broadcast/'.date('Y-m-d', $now).'.smil /home/tv/broadcast/broadcast.smil');
 
 //  exec('/usr/bin/sudo -u broadcast ssh tv@'.REMOTEHOST.' ln -sf '.REMOTEDIR.'/'.date('Y-m-d', $now).'.smil broadcast.smil');
 //  exec('/usr/bin/sudo -u broadcast fusermount -u '.BROADCASTDIR);

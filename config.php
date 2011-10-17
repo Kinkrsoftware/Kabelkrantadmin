@@ -1,4 +1,5 @@
 <?php
+  define ('VERSION', '1.1.0');
   define ('OWNER', 'MidvlietTV');
   define ('ABSOLUTEDIR', '/var/www/kabelkrantadmin/htdocs');
   define ('TEMPLATEDIR', ABSOLUTEDIR.'/xsl');
@@ -15,6 +16,9 @@
   define ('DURATION', 23);
   define ('REMOTEHOST', '127.0.0.1');
   define ('REMOTEDIR', 'broadcast');
+/*  define ('RESOLUTIONW', '720');
+  define ('RESOLUTIONH', '576');
+*/
   define ('RESOLUTIONW', '1024');
   define ('RESOLUTIONH', '768');
 
