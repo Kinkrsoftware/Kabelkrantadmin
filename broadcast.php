@@ -158,7 +158,7 @@
              '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'.$rn.
 	     '<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >'.$rn.
              '  <head>'.$rn.
-	     '    <title>PlusRTV</title>'.$rn.
+	     '    <title>'.OWNER.'</title>'.$rn.
 	     '    <script type="text/javascript" src="smil.js"></script>'.$rn.
              '    <link rel="stylesheet" href="index.css" type="text/css" />'.$rn.
              '  </head>'.$rn.
@@ -193,7 +193,7 @@
     exec('mkdir '.$tmpdirectory);
   }
 
-//  exec('/usr/bin/mogrify -resize '.WEBRESOLUTIONW.'x'.WEBRESOLUTIONH.' -format jpg '.$tmpdirectory.'/*.png');
+  exec('/usr/bin/mogrify -geometry '.WEBRESOLUTIONW.'x'.WEBRESOLUTIONH.'! -format jpg '.$tmpdirectory.'/*.png');
   exec('mv -u '.$tmpdirectory.'/*.smil '.BROADCASTDIR.'/.');
   exec('mv -u '.$tmpdirectory.'/*.html '.BROADCASTDIR.'/.');
   exec('mv -u '.$tmpdirectory.'/*.jpg '.BROADCASTCACHEDIR.'/.');
