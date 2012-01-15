@@ -26,11 +26,14 @@
   $dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
 
   if (active('category', 'newtemplate') != '') {
+    $param_newtemplate = active('category', 'newtemplate');
     $stmt = $dbh->prepare('SELECT title FROM content_category WHERE content_category.id=:contentcategoryid');
-    $stmt->bindParam(':contentcategoryid', active('category', 'newtemplate'), PDO::PARAM_INT);
+    $stmt->bindParam(':contentcategoryid', $param_newtemplate, PDO::PARAM_INT);
     $stmt->execute();
     $qresult = $stmt->fetchAll();
   }
+
+  $preview = '404';
 
   if (isset($qresult[0])) {
 
