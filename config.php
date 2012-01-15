@@ -1,7 +1,7 @@
 <?php
   define ('VERSION', '1.1.0');
   define ('OWNER', 'MidvlietTV');
-  define ('ABSOLUTEDIR', '/var/www/kabelkrantadmin/htdocs');
+  define ('ABSOLUTEDIR', '/usr/src/BroadcastAdmin/CMS/Kabelkrantadmin');
   define ('TEMPLATEDIR', ABSOLUTEDIR.'/xsl');
   define ('PREVIEWDIR', ABSOLUTEDIR.'/preview');
   define ('USER_IMAGEDIR', ABSOLUTEDIR.'/fotos');
@@ -38,4 +38,6 @@
   define ('EMERGENCY', false);
 
   date_default_timezone_set('Europe/Amsterdam');
+  setlocale(LC_ALL,'nl_NL');
+  setlocale(LC_NUMERIC, 'en_US'); /* Make sure this is EN, because of . , in XSLT */
 ?>
