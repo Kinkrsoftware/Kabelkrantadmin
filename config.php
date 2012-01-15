@@ -36,4 +36,6 @@
   define ('WEBRESOLUTIONH', '360');
 
   define ('EMERGENCY', false);
+
+  date_default_timezone_set('Europe/Amsterdam');
 ?>
