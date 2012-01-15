@@ -83,7 +83,7 @@
     if (is_dir($dir)) {
       if ($dh = opendir($dir)) {
         while (($file = readdir($dh)) !== false) {
-          if (!is_dir($dir.'/'.$file)) {
+          if ($file[0] != '.' && !is_dir($dir.'/'.$file)) {
 	    if ($maxdate == 0 || (filectime($dir.'/'.$file) > $maxdate)) {
               if ($extension == '' || (substr( $file, strlen( $file ) - strlen( $extension ) ) === $extension)) {
                 $templates[]=$file;

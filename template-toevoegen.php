@@ -26,15 +26,18 @@
   $dbh = new PDO(DATABASE, DB_USER, DB_PASSWORD);
 
   if (active('category', 'newtemplate') != '') {
+    $param_newtemplate = active('category', 'newtemplate');
     $stmt = $dbh->prepare('SELECT title FROM content_category WHERE content_category.id=:contentcategoryid');
-    $stmt->bindParam(':contentcategoryid', active('category', 'newtemplate'), PDO::PARAM_INT);
+    $stmt->bindParam(':contentcategoryid', $param_newtemplate, PDO::PARAM_INT);
     $stmt->execute();
     $qresult = $stmt->fetchAll();
   }
 
+  $preview = '404';
+
   if (isset($qresult[0])) {
 
-  $preview = checkandpreview($safebox=1, $width=269, $height=200, $format='png', 
+  $preview = checkandpreview($safebox=1, $width=PREVIEWRESOLUTIONW, $height=PREVIEWRESOLUTIONH, $format='png', 
   			       active('title', 'newtemplate'), 'Laten we het eens zonder tekst doen.', '',
 			       'default.xsl', $dir='', $filename=md5('default.xsl'.$qresult[0]['title'].active('title', 'newtemplate').active('photo', 'newtemplate').active('w', 'newtemplate').active('h', 'newtemplate').active('x', 'newtemplate').active('y', 'newtemplate')),
 			       $qresult[0]['title'],
