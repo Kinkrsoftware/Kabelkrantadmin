@@ -133,8 +133,8 @@
       if (defined('BUMPDURATION') && $current_cat != $image['category']) {
 	$current_cat = $image['category'];
 	$bump = $image['category'].'.png';
-	exec('cp "'.USER_IMAGEDIR.'/'.$bump.'" "'.$tmpdirectory.'/'.$bump.'"');
 	if (file_exists(USER_IMAGEDIR.'/'.$bump)) {
+	  exec('cp "'.USER_IMAGEDIR.'/'.$bump.'" "'.$tmpdirectory.'/'.$bump.'"');
 	  fputs($fp, '      <img src="'.REMOTEDIR.'/cache/'.$bump.'" alt="'.htmlspecialchars('Bump - '.$image['category'], ENT_QUOTES, 'UTF-8').'" dur="'.BUMPDURATION.'s" region="content" fill="remove" erase="whenDone" />'.chr(13).chr(10));
 	}
 
