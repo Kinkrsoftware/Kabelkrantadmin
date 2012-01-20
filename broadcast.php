@@ -70,9 +70,7 @@
 
 //  exec('/usr/bin/sudo -u broadcast sshfs -o nonempty -o allow_other tv@'.REMOTEHOST.':'.REMOTEDIR.' '.BROADCASTDIR);
   
-
   $tmpdirectory = CACHEDIR.'/'.date('Y-m-d',$now);
-//  $tmpdirectory = CACHEDIR;
   if (!file_exists($tmpdirectory)) {
     if (!file_exists(CACHEDIR)) mkdir(CACHEDIR);
     mkdir($tmpdirectory);
