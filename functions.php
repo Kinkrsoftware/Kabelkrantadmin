@@ -1,5 +1,4 @@
 <?php
-  setlocale(LC_ALL,'nl_NL');
   require_once('message.php');
   if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') === false)
     header('Content-type: application/xhtml+xml; charset=utf-8');
@@ -289,7 +288,7 @@
       $svgfile = $dir.'/'.$filename.'.svg';
       $file = $dir.'/'.$filename.'.png';
 
-      $cmd .= $svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file.'\n';
+      $cmd .= $svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file."\n";
     }
     $cmd .= 'quit';
     shell_exec('echo "'.$cmd.'" | /usr/bin/inkscape --shell 2>&1 1>/dev/null');
