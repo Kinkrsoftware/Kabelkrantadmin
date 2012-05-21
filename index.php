@@ -58,7 +58,7 @@
 
 		$result = $stmt->fetchAll();
 	?>
-        <th class="none"><?php echo OWNER; ?> <a href="toevoegen.php" style="text-align: right;"><?php echo ADD; ?></a><br />
+        <th class="none"><?php echo OWNER; ?> <a href="toevoegen.php" style="text-align: right;"><?php echo ADD; ?></a> <a href="broadcast.php" style="text-align: right;"><?php echo GENERATEANDBROADCAST; ?></a><br />
 	<?php echo LENGTH; ?>: <?php echo $result[0]['duration']; ?>s
 	<?php echo '('.(($result[0]['duration']-($result[0]['duration']%60))/60).':'.(($result[0]['duration']%60)<10?'0':'').($result[0]['duration']%60).')'; ?> <a href="overzicht.html"><?php echo NEXTPER; ?></a></th>
 	<th><?php echo START; ?></th>

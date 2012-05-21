@@ -1,4 +1,5 @@
 <?php
+  setlocale(LC_ALL,'nl_NL');
   require_once('message.php');
   if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') === false)
     header('Content-type: application/xhtml+xml; charset=utf-8');
@@ -82,7 +83,7 @@
     if (is_dir($dir)) {
       if ($dh = opendir($dir)) {
         while (($file = readdir($dh)) !== false) {
-          if ($file[0] != '.' && !is_dir($dir.'/'.$file)) {
+          if (!is_dir($dir.'/'.$file)) {
 	    if ($maxdate == 0 || (filectime($dir.'/'.$file) > $maxdate)) {
               if ($extension == '' || (substr( $file, strlen( $file ) - strlen( $extension ) ) === $extension)) {
                 $templates[]=$file;
@@ -267,7 +268,7 @@
 
       if ($batch === true) return $filename;
 
-      $debug = shell_exec('/usr/bin/inkscape -z --file='.$svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file.' 2>&1 1>/dev/null');
+      $debug = shell_exec('/usr/bin/inkscape -d 150 -z --file='.$svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file.' 2>&1 1>/dev/null');
 
 	//echo $debug;
 	//exit;
@@ -288,7 +289,7 @@
       $svgfile = $dir.'/'.$filename.'.svg';
       $file = $dir.'/'.$filename.'.png';
 
-      $cmd .= $svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file."\n";
+      $cmd .= $svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file.'\n';
     }
     $cmd .= 'quit';
     shell_exec('echo "'.$cmd.'" | /usr/bin/inkscape --shell 2>&1 1>/dev/null');
