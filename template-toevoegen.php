@@ -82,8 +82,9 @@
 
    
   if (active('category', 'newtemplate') != '') {
+    $category = active('category', 'newtemplate');
     $stmt = $dbh->prepare('SELECT title FROM content_category WHERE content_category.id=:contentcategoryid');
-    $stmt->bindParam(':contentcategoryid', active('category', 'newtemplate'), PDO::PARAM_INT);
+    $stmt->bindParam(':contentcategoryid', $category, PDO::PARAM_INT);
     $stmt->execute();
     $qresult = $stmt->fetchAll();
   }
@@ -92,9 +93,9 @@
 
   if (isset($qresult[0])) {
 
-  $preview = checkandpreview($safebox=1, $width=269, $height=200, $format='png', 
+  $preview = checkandpreview($safebox=1, $width=PREVIEWRESOLUTIONW, $height=PREVIEWRESOLUTIONH, $format='png', 
   			       active('title', 'newtemplate'), 'Laten we het eens zonder tekst doen.', '',
-			       'default.xsl', $dir='', $filename=md5('default.xsl'.$qresult[0]['title'].active('title', 'newtemplate').active('photo', 'newtemplate').active('w', 'newtemplate').active('h', 'newtemplate').active('x', 'newtemplate').active('y', 'newtemplate')),
+			       '0-default.xsl', $dir='', $filename=md5('0-default.xsl'.$qresult[0]['title'].active('title', 'newtemplate').active('photo', 'newtemplate').active('w', 'newtemplate').active('h', 'newtemplate').active('x', 'newtemplate').active('y', 'newtemplate')),
 			       $qresult[0]['title'],
 			       active('photo', 'newtemplate'), active('w', 'newtemplate'),
 			       active('h', 'newtemplate'), active('x', 'newtemplate'), active('y', 'newtemplate'));
@@ -162,8 +163,9 @@
 	        echo dbtoselect('category', $qresult, active('category', 'newtemplate'), true);
             
             if (active('category', 'newtemplate') > 0) {
+	    	$category = active('category', 'newtemplate');
                 $stmt = $dbh->prepare('SELECT cci.id, cci.title FROM content_category_image AS cci WHERE cci.categoryid = :categoryid ORDER BY cci.title');
-                $stmt->bindParam(':categoryid', active('category', 'newtemplate'), PDO::PARAM_INT);
+                $stmt->bindParam(':categoryid', $category, PDO::PARAM_INT);
                 $stmt->execute();
                 $qresult = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 echo dbtoselect('activeid', $qresult, active('activeid', 'newtemplate'), true);
@@ -187,7 +189,7 @@
       </fieldset>
       <fieldset>
         <legend><?php echo PHOTO; ?></legend>
-        <?php echo dirtoselect('photo', 'fotos', active('photo', 'newtemplate'), true); ?>
+        <?php echo dirtoselect('photo', USER_IMAGEDIR, active('photo', 'newtemplate'), true); ?>
         <a href="photoupload.php">Uploaden</a>
        </fieldset>
       <fieldset>

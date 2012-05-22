@@ -241,7 +241,7 @@
    
       $photo_xml = '<photo>'.($photo!=''?USER_IMAGEDIR.'/'.$photo:'').'</photo>';
 
-      $template = ($template!=''&&file_exists($template)?$template:TEMPLATEDIR.'/default.xsl');
+      $template = ($template!=''&&file_exists($template)?$template:TEMPLATEDIR.'/0-default.xsl');
 
       $xml = new domDocument();
       $xml->loadXML('<article>'.
