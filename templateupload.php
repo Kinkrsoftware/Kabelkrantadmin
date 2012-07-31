@@ -9,13 +9,13 @@
   if (isset($_FILES['userfile']['tmp_name'])) {
   	if (substr($_FILES['userfile']['name'], -4) == '.svg') {
 		$svg = file_get_contents($_FILES['userfile']['tmp_name']);
-		$svg = str_replace(array('TITLE',
+		$svg = str_replace(array('NORMAL_TITLE',
 		       	                 'CATEGORY_TITLE',
 		  	                 'CATEGORY_IMAGE',
 		  			 'PHOTO',
 					 'PARA'),
 				   array('<xsl:value-of select="/article/title" />',
-				   	 '{<xsl:value-of select="/article/category/img/title" />',
+				   	 '<xsl:value-of select="/article/category/title" />',
 				         '{article/category/img/src}',
 					 '{/article/photo}',
 					 '<xsl:apply-templates select="/article/para" />'),
