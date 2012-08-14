@@ -8,11 +8,12 @@
 	for ($i=0; $i<=60; $i++) {
 		$start = $now;
 		$end = $now;
+		$curday = date('N', $now);
 		
 		$stmt = $dbh->prepare('SELECT sum(content_text.duration) AS totaal FROM content_run, content_text WHERE content_run.enabled = 1 AND (content_run.day = 0 or content_run.day = :curday) AND content_run.start <= :start AND content_run.eind >= :end AND content_text.contentid = content_run.contentid;');
 		$stmt->bindParam(':start', $start, PDO::PARAM_INT);
 		$stmt->bindParam(':end', $end, PDO::PARAM_INT);
-		$stmt->bindParam(':curday', date('N', $now), PDO::PARAM_INT);
+		$stmt->bindParam(':curday', $curday, PDO::PARAM_INT);
 		$stmt->execute();
 		$result = $stmt->fetchAll();
 
