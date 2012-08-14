@@ -241,7 +241,7 @@
    
       $photo_xml = '<photo>'.($photo!=''?USER_IMAGEDIR.'/'.$photo:'').'</photo>';
 
-      $template = ($template!=''&&file_exists($template)?$template:TEMPLATEDIR.'/default.xsl');
+      $template = ($template!=''&&file_exists($template)?$template:TEMPLATEDIR.'/0-default.xsl');
 
       $xml = new domDocument();
       $xml->loadXML('<article>'.
@@ -289,7 +289,7 @@
       $svgfile = $dir.'/'.$filename.'.svg';
       $file = $dir.'/'.$filename.'.png';
 
-      $cmd .= $svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file.'\n';
+      $cmd .= $svgfile.' --export-width='.$width.' --export-height='.$height.' --export-png='.$file."\n";
     }
     $cmd .= 'quit';
     shell_exec('echo "'.$cmd.'" | /usr/bin/inkscape --shell 2>&1 1>/dev/null');
