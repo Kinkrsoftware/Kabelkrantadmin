@@ -4,10 +4,23 @@
 
 SET statement_timeout = 0;
 SET client_encoding = 'UTF8';
-SET standard_conforming_strings = off;
+SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET escape_string_warning = off;
+
+--
+-- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
+--
+
+CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
+
+
+--
+-- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
+
 
 SET search_path = public, pg_catalog;
 
@@ -67,12 +80,19 @@ ALTER TABLE public.ads_ref OWNER TO kka;
 CREATE SEQUENCE content_seq
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
 ALTER TABLE public.content_seq OWNER TO kka;
+
+--
+-- Name: content_seq; Type: SEQUENCE SET; Schema: public; Owner: kka
+--
+
+SELECT pg_catalog.setval('content_seq', 24, true);
+
 
 --
 -- Name: content; Type: TABLE; Schema: public; Owner: kka; Tablespace: 
@@ -95,12 +115,19 @@ ALTER TABLE public.content OWNER TO kka;
 CREATE SEQUENCE content_category_seq
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
 ALTER TABLE public.content_category_seq OWNER TO kka;
+
+--
+-- Name: content_category_seq; Type: SEQUENCE SET; Schema: public; Owner: kka
+--
+
+SELECT pg_catalog.setval('content_category_seq', 5, true);
+
 
 --
 -- Name: content_category; Type: TABLE; Schema: public; Owner: kka; Tablespace: 
@@ -122,12 +149,19 @@ ALTER TABLE public.content_category OWNER TO kka;
 CREATE SEQUENCE content_category_image_seq
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
 ALTER TABLE public.content_category_image_seq OWNER TO kka;
+
+--
+-- Name: content_category_image_seq; Type: SEQUENCE SET; Schema: public; Owner: kka
+--
+
+SELECT pg_catalog.setval('content_category_image_seq', 10, true);
+
 
 --
 -- Name: content_category_image; Type: TABLE; Schema: public; Owner: kka; Tablespace: 
@@ -148,18 +182,38 @@ CREATE TABLE content_category_image (
 ALTER TABLE public.content_category_image OWNER TO kka;
 
 --
+-- Name: content_category_screen; Type: TABLE; Schema: public; Owner: kka; Tablespace: 
+--
+
+CREATE TABLE content_category_screen (
+    categoryid integer NOT NULL,
+    screenid integer NOT NULL,
+    visible boolean NOT NULL
+);
+
+
+ALTER TABLE public.content_category_screen OWNER TO kka;
+
+--
 -- Name: content_editor_seq; Type: SEQUENCE; Schema: public; Owner: kka
 --
 
 CREATE SEQUENCE content_editor_seq
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
 ALTER TABLE public.content_editor_seq OWNER TO kka;
+
+--
+-- Name: content_editor_seq; Type: SEQUENCE SET; Schema: public; Owner: kka
+--
+
+SELECT pg_catalog.setval('content_editor_seq', 1, false);
+
 
 --
 -- Name: content_editor; Type: TABLE; Schema: public; Owner: kka; Tablespace: 
@@ -181,12 +235,19 @@ ALTER TABLE public.content_editor OWNER TO kka;
 CREATE SEQUENCE content_run_seq
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
 ALTER TABLE public.content_run_seq OWNER TO kka;
+
+--
+-- Name: content_run_seq; Type: SEQUENCE SET; Schema: public; Owner: kka
+--
+
+SELECT pg_catalog.setval('content_run_seq', 279, true);
+
 
 --
 -- Name: content_run; Type: TABLE; Schema: public; Owner: kka; Tablespace: 
@@ -223,12 +284,19 @@ ALTER TABLE public.content_seens OWNER TO kka;
 CREATE SEQUENCE content_text_seq
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
 ALTER TABLE public.content_text_seq OWNER TO kka;
+
+--
+-- Name: content_text_seq; Type: SEQUENCE SET; Schema: public; Owner: kka
+--
+
+SELECT pg_catalog.setval('content_text_seq', 551, true);
+
 
 --
 -- Name: content_text; Type: TABLE; Schema: public; Owner: kka; Tablespace: 
@@ -255,12 +323,19 @@ ALTER TABLE public.content_text OWNER TO kka;
 CREATE SEQUENCE editors_seq
     START WITH 1
     INCREMENT BY 1
-    NO MAXVALUE
     NO MINVALUE
+    NO MAXVALUE
     CACHE 1;
 
 
 ALTER TABLE public.editors_seq OWNER TO kka;
+
+--
+-- Name: editors_seq; Type: SEQUENCE SET; Schema: public; Owner: kka
+--
+
+SELECT pg_catalog.setval('editors_seq', 1, false);
+
 
 --
 -- Name: editors; Type: TABLE; Schema: public; Owner: kka; Tablespace: 
@@ -291,6 +366,55 @@ CREATE TABLE rights (
 
 
 ALTER TABLE public.rights OWNER TO kka;
+
+--
+-- Name: screen; Type: TABLE; Schema: public; Owner: kka; Tablespace: 
+--
+
+CREATE TABLE screen (
+    id integer NOT NULL,
+    name character varying(255),
+    location character varying(255),
+    ip character varying(16)
+);
+
+
+ALTER TABLE public.screen OWNER TO kka;
+
+--
+-- Name: screen_id_seq; Type: SEQUENCE; Schema: public; Owner: kka
+--
+
+CREATE SEQUENCE screen_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE public.screen_id_seq OWNER TO kka;
+
+--
+-- Name: screen_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: kka
+--
+
+ALTER SEQUENCE screen_id_seq OWNED BY screen.id;
+
+
+--
+-- Name: screen_id_seq; Type: SEQUENCE SET; Schema: public; Owner: kka
+--
+
+SELECT pg_catalog.setval('screen_id_seq', 5, true);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: kka
+--
+
+ALTER TABLE ONLY screen ALTER COLUMN id SET DEFAULT nextval('screen_id_seq'::regclass);
+
 
 --
 -- Name: actions_action_key; Type: CONSTRAINT; Schema: public; Owner: kka; Tablespace: 
@@ -338,6 +462,14 @@ ALTER TABLE ONLY content_category_image
 
 ALTER TABLE ONLY content_category
     ADD CONSTRAINT content_category_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: content_category_screen_pkey; Type: CONSTRAINT; Schema: public; Owner: kka; Tablespace: 
+--
+
+ALTER TABLE ONLY content_category_screen
+    ADD CONSTRAINT content_category_screen_pkey PRIMARY KEY (categoryid, screenid);
 
 
 --
@@ -405,6 +537,14 @@ ALTER TABLE ONLY rights
 
 
 --
+-- Name: screen_pkey; Type: CONSTRAINT; Schema: public; Owner: kka; Tablespace: 
+--
+
+ALTER TABLE ONLY screen
+    ADD CONSTRAINT screen_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: unique_category_title; Type: CONSTRAINT; Schema: public; Owner: kka; Tablespace: 
 --
 
@@ -418,6 +558,22 @@ ALTER TABLE ONLY content_category
 
 ALTER TABLE ONLY content_category_image
     ADD CONSTRAINT content_category_image_categoryid_fkey FOREIGN KEY (categoryid) REFERENCES content_category(id);
+
+
+--
+-- Name: content_category_screen_categoryid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: kka
+--
+
+ALTER TABLE ONLY content_category_screen
+    ADD CONSTRAINT content_category_screen_categoryid_fkey FOREIGN KEY (categoryid) REFERENCES content_category(id);
+
+
+--
+-- Name: content_category_screen_screenid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: kka
+--
+
+ALTER TABLE ONLY content_category_screen
+    ADD CONSTRAINT content_category_screen_screenid_fkey FOREIGN KEY (screenid) REFERENCES screen(id);
 
 
 --

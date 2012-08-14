@@ -18,6 +18,11 @@
       	width: 100px;
       }
 
+      input[type="checkbox"] {
+      	width: auto;
+	text-align: center;
+      }
+
       fieldset,select {
         border: 1px solid #000;
       }
@@ -42,6 +47,11 @@
         width: auto;
         margin-right: 1px;
         background-repeat: no-repeat;
+      }
+
+      table.screen td {
+      	margin: 0 auto;
+      	text-align: center;
       }
 
       td.startdate {

@@ -15,6 +15,7 @@ define('VIEW', 'Toon');
 define('UNDEFINED', 'undefined');
 define('GENERATEANDBROADCAST', 'Verversen');
 
+define('SCREEN_NAME', 'Scherm Naam');
 
 define('EXAMPLE', 'Voorbeeld');
 define('PLAYEDAT', 'Looptijden');
@@ -29,6 +30,7 @@ define('ACT_SAVE', 'Opslaan');
 define('ACT_NEWI', 'Nieuw Item');
 define('ACT_NEWP', 'Nieuwe Looptijd');
 define('ACT_BACK', 'Terug');
+define('ACT_SAVE_SCREEN', 'Opslaan');
 
 define('TEXTPAGE', 'Tekst Pagina');
 define('TEMPLATE', 'Sjabloon');
