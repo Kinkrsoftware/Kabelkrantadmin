@@ -62,5 +62,6 @@
 	   </table>
 	</fieldset>
      </form>
+     <a href="template-toevoegen.php" style="float: right;">Terug</a>
 </body>
 </html>
