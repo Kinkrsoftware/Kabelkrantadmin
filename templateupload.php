@@ -9,7 +9,7 @@
   if (isset($_FILES['userfile']['tmp_name'])) {
   	if (substr($_FILES['userfile']['name'], -4) == '.svg') {
 		$svg = file_get_contents($_FILES['userfile']['tmp_name']);
-		$svg = str_replace(array('NORMAL_TITLE',
+		$svg = str_replace(array('ARTICLE_TITLE',
 		       	                 'CATEGORY_TITLE',
 		  	                 'CATEGORY_IMAGE',
 		  			 'PHOTO',
