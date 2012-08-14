@@ -4,7 +4,7 @@ define('NO', 'Nee');
 define('NORESULT', 'Geen resultaten gevonden');
 define('WELCOME', 'Kabelkrantadmin');
 define('EMERG', 'NOODSITUATIE UITZENDING AAN');
-define('GENERATE', 'Genereren = Kopieeren');
+define('GENERATE', 'Verversen');
 define('ADD', 'Toevoegen');
 define('NEXTPER', 'Komende Periode');
 define('START', 'Start');
@@ -13,11 +13,14 @@ define('LENGTH', 'Duur');
 define('LASTMOD', 'Laatste wijziging door');
 define('VIEW', 'Toon');
 define('UNDEFINED', 'undefined');
+define('GENERATEANDBROADCAST', 'Verversen');
 
 
 define('EXAMPLE', 'Voorbeeld');
 define('PLAYEDAT', 'Looptijden');
 define('ACTION', 'Acties');
+define('TPL_OPEN', 'Open');
+define('TPL_REMOVE', 'Verwijder');
 define('ACT_UPD', 'Update');
 define('ACT_ADD', 'Toevoegen');
 define('ACT_DEL', 'Wissen');
@@ -32,7 +35,7 @@ define('TEMPLATE', 'Sjabloon');
 define('PHOTO', 'Foto');
 define('TITLE', 'Titel');
 define('TEXT', 'Tekst');
-define('NEWIMAGE', 'Nieuwe Afbeelding');
+define('NEWIMAGE', 'Sjablonen');
 define('UPLOAD', 'Upload');
 define('ERROR_IN_TEMPLATE', 'XML-fout in document');
 
