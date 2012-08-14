@@ -76,7 +76,6 @@
     if (!file_exists(CACHEDIR)) mkdir(CACHEDIR);
     mkdir($tmpdirectory);
   }
-
   $out = array();
   $batch = array();
   foreach ($result as $entry) {

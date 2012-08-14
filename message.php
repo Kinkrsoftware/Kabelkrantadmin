@@ -4,7 +4,7 @@ define('NO', 'Nee');
 define('NORESULT', 'Geen resultaten gevonden');
 define('WELCOME', 'Kabelkrantadmin');
 define('EMERG', 'NOODSITUATIE UITZENDING AAN');
-define('GENERATE', 'Genereren = Kopieeren');
+define('GENERATE', 'Verversen');
 define('ADD', 'Toevoegen');
 define('NEXTPER', 'Komende Periode');
 define('START', 'Start');
@@ -13,7 +13,7 @@ define('LENGTH', 'Duur');
 define('LASTMOD', 'Laatste wijziging door');
 define('VIEW', 'Toon');
 define('UNDEFINED', 'undefined');
-define('GENERATEANDBROADCAST', 'Genereren = Kopie&euml;ren');
+define('GENERATEANDBROADCAST', 'Verversen');
 
 
 define('EXAMPLE', 'Voorbeeld');

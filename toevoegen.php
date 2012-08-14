@@ -50,7 +50,7 @@
       }
     }
     
-    header('Location: '.$_SERVER['PHP_SELF']);
+    header('Location: toevoegen.php');
     exit;
   }
 
@@ -151,7 +151,7 @@
     }
    
     $dbh = null;
-    header('Location: '.$_SERVER['PHP_SELF'].'?databaseid='.$_SESSION['document']['databaseid']);
+    header('Location: toevoegen.php?databaseid='.$_SESSION['document']['databaseid']);
     exit;
   } 
 

@@ -112,13 +112,21 @@
         $stmt = $dbh->prepare('UPDATE content_category_image SET categoryid = :categoryid, title = :title, photo = :photo, width = :width, height = :height, x = :x, y = :y WHERE id = :id');
         $stmt->bindParam(':id', $_SESSION['newtemplate']['activeid'], PDO::PARAM_INT);
     }
-    $stmt->bindParam(':categoryid', active('category', 'newtemplate'), PDO::PARAM_INT);
-    $stmt->bindParam(':title', active('title', 'newtemplate'), PDO::PARAM_STR, 20);
-    $stmt->bindParam(':photo', active('photo', 'newtemplate'), PDO::PARAM_STR, 100);
-    $stmt->bindParam(':width', active('w', 'newtemplate'), PDO::PARAM_INT);
-    $stmt->bindParam(':height', active('h', 'newtemplate'), PDO::PARAM_INT);
-    $stmt->bindParam(':x', active('x', 'newtemplate'), PDO::PARAM_INT);
-    $stmt->bindParam(':y', active('y', 'newtemplate'), PDO::PARAM_INT);
+    $category = active('category', 'newtemplate');
+    $title = active('title', 'newtemplate');
+    $photo = active('photo', 'newtemplate');
+    $width = active('w', 'newtemplate');
+    $height = active('height', 'newtemplate');
+    $left = active('x', 'newtemplate');
+    $top = active('y', 'newtemplate');
+
+    $stmt->bindParam(':categoryid', $category, PDO::PARAM_INT);
+    $stmt->bindParam(':title', $title, PDO::PARAM_STR, 20);
+    $stmt->bindParam(':photo', $photo, PDO::PARAM_STR, 100);
+    $stmt->bindParam(':width', $width, PDO::PARAM_INT);
+    $stmt->bindParam(':height', $height, PDO::PARAM_INT);
+    $stmt->bindParam(':x', $left, PDO::PARAM_INT);
+    $stmt->bindParam(':y', $top, PDO::PARAM_INT);
     $stmt->execute();
     $dbh->commit();
     #header('Location: toevoegen.php');
