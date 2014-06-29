@@ -102,13 +102,20 @@
 
 //	  .'\', \''.str_replace('\'', '\\\'', passive('text_content', $key)).'\')');
 
+	  $text_template = passive('text_template', $key);
+	  $text_category = passive('text_category', $key);
+	  $text_duration = passive('text_duration', $key);
+	  $text_photo = passive('text_photo', $key);
+	  $text_title = passive('text_title', $key);
+	  $text_content = passive('text_content', $key);
+
 	  $stmt->bindParam(':databaseid', $_SESSION['document']['databaseid'], PDO::PARAM_INT);
-	  $stmt->bindParam(':text_template', passive('text_template', $key), PDO::PARAM_STR, 50);
-	  $stmt->bindParam(':text_category', passive('text_category', $key), PDO::PARAM_INT);
-	  $stmt->bindParam(':text_duration', passive('text_duration', $key), PDO::PARAM_INT);
-	  $stmt->bindParam(':text_photo', passive('text_photo', $key), PDO::PARAM_STR, 100);
-	  $stmt->bindParam(':text_title', passive('text_title', $key), PDO::PARAM_STR, 128);
-	  $stmt->bindParam(':text_content', passive('text_content', $key), PDO::PARAM_STR);
+	  $stmt->bindParam(':text_template', $text_template, PDO::PARAM_STR, 50);
+	  $stmt->bindParam(':text_category', $text_category, PDO::PARAM_INT);
+	  $stmt->bindParam(':text_duration', $text_duration, PDO::PARAM_INT);
+	  $stmt->bindParam(':text_photo', $text_photo, PDO::PARAM_STR, 100);
+	  $stmt->bindParam(':text_title', $text_title, PDO::PARAM_STR, 128);
+	  $stmt->bindParam(':text_content', $text_content, PDO::PARAM_STR);
 	  $stmt->execute();
 	}
       }
@@ -199,6 +206,14 @@
   <head>
     <title><?php echo OWNER; ?></title>
     <link rel="stylesheet" href="toevoegen.css" type="text/css" />
+    <script>
+        function updateDuration() {
+            var duration = Math.max(document.getElementById('text_content').value.split(' ').length * 0.24, 12);
+            document.getElementById('text_duration_hh').value = Math.floor(duration / 3600);
+            document.getElementById('text_duration_mm').value = Math.floor((duration % 3600) / 60);
+            document.getElementById('text_duration_ss').value = Math.floor(duration % 60);           
+        }
+    </script>
   </head>
   <body>
     <form method="post">
@@ -248,7 +263,7 @@ foreach ($_SESSION['document'] as $key => $value) {
 	  <a href="photoupload.php"><?php echo UPLOAD; ?></a>
 	</fieldset>
         <label><?php echo TITLE; ?></label><input type="text" name="text_title" value="<?php echo active('text_title'); ?>" /><br />
-        <label><?php echo TEXT; ?></label><textarea name="text_content" rows="16" cols="70"><?php echo active('text_content'); ?></textarea>
+        <label><?php echo TEXT; ?></label><textarea id="text_content" name="text_content" rows="16" cols="70" oninput="updateDuration();"><?php echo active('text_content'); ?></textarea>
 	<img src="preview/<?php echo checkandgenerate($dbh, $_SESSION['document']['activeid'], 1); ?>.png" alt="Preview" style="float: left; border: solid 1px #000; margin-left: 2px; margin-top: 2px;" onclick="if (this.width == <?php echo WEBRESOLUTIONW;?>) { this.width=<?php echo PREVIEWRESOLUTIONW;?>; this.height=<?php echo PREVIEWRESOLUTIONH;?>; } else { this.width=<?php echo WEBRESOLUTIONW;?>; this.height=<?php echo WEBRESOLUTIONH;?>; }"/>
       </fieldset>
     </form>
